@@ -1,58 +1,138 @@
+using System.IO;
 using HtmlAgilityPack;
+using Microsoft.Playwright;
 
 namespace DashboardAPI.Services
 {
     public class WebScraperService
     {
-        private readonly HttpClient _httpClient;
+      public async Task<List<Dictionary<string, string>>> GetTableData(string url)
+{
+    var result = new List<Dictionary<string, string>>();
 
-        public WebScraperService(HttpClient httpClient)
-        {
-            _httpClient = httpClient;
-        }
+    using var playwright = await Playwright.CreateAsync();
 
-        public async Task<List<Dictionary<string, string>>> GetTableData(string url)
-        {
-            var html = await _httpClient.GetStringAsync(url);
+    var userDataDir =
+        Path.Combine(
+            Environment.GetFolderPath(
+                Environment.SpecialFolder.LocalApplicationData),
+            "PlaywrightProfile");
 
-            var doc = new HtmlDocument();
-            doc.LoadHtml(html);
-
-            var table = doc.DocumentNode.SelectSingleNode("//table");
-
-            var result = new List<Dictionary<string, string>>();
-
-            if (table == null)
-                return result;
-
-            var rows = table.SelectNodes(".//tr");
-
-            if (rows == null)
-                return result;
-
-            var headers = rows[0]
-                .SelectNodes(".//th|.//td")
-                .Select(h => h.InnerText.Trim())
-                .ToList();
-
-            foreach (var row in rows.Skip(1))
+    var context =
+        await playwright.Chromium.LaunchPersistentContextAsync(
+            userDataDir,
+            new BrowserTypeLaunchPersistentContextOptions
             {
-                var cells = row.SelectNodes(".//td");
+                Headless = false,
+                Channel = "msedge"
+            });
 
-                if (cells == null)
-                    continue;
+    var page =
+        context.Pages.FirstOrDefault()
+        ?? await context.NewPageAsync();
 
-                var item = new Dictionary<string, string>();
+    await page.GotoAsync(
+        url,
+        new PageGotoOptions
+        {
+            WaitUntil = WaitUntilState.DOMContentLoaded,
+            Timeout = 120000
+        });
 
-                for (int i = 0; i < headers.Count && i < cells.Count; i++)
-                {
-                    item[headers[i]] = cells[i].InnerText.Trim();
-                }
+    // =========================
+    // FILTROS AUTOMÁTICOS
+    // =========================
 
-                result.Add(item);
-            }
+    await page.SelectOptionAsync(
+        "select[name='cveDivision']",
+        "DC000");
 
-            return result;
+    await page.SelectOptionAsync(
+        "select[name='cveZona']",
+        "00000");
+
+    await page.SelectOptionAsync(
+        "select[name='cveArea']",
+        "00000");
+
+    await page.SelectOptionAsync(
+        "select[name='cveProceso']",
+        "D");
+
+    await page.SelectOptionAsync(
+        "select[name='cveProcImproc']",
+        "T");
+
+    // =========================
+    // CLICK PROCESA
+    // =========================
+
+    await page.ClickAsync("#procesa");
+
+    // =========================
+    // ESPERAR TABLA FINAL
+    // =========================
+
+    await page.WaitForSelectorAsync(
+        "#TABLE_12",
+        new PageWaitForSelectorOptions
+        {
+            Timeout = 120000
+        });
+
+    await page.WaitForTimeoutAsync(5000);
+
+    var html = await page.ContentAsync();
+
+    var doc = new HtmlDocument();
+
+    doc.LoadHtml(html);
+
+    var table =
+        doc.DocumentNode.SelectSingleNode(
+            "//table[@id='TABLE_12']");
+
+    if (table == null)
+        return result;
+
+    var rows =
+        table.SelectNodes(".//tbody/tr");
+
+    if (rows == null)
+        return result;
+
+    var headers =
+        table.SelectNodes(".//thead/tr[2]/th")
+        .Select(h => h.InnerText.Trim())
+        .ToList();
+
+    headers.Insert(0, "AREA");
+
+    foreach (var row in rows)
+    {
+        var cells = row.SelectNodes("./td");
+
+        if (cells == null || cells.Count < 2)
+            continue;
+
+        var item =
+            new Dictionary<string, string>();
+
+        item["AREA"] =
+            cells[1].InnerText.Trim();
+
+        for (int i = 2;
+             i < cells.Count && i - 2 < headers.Count - 1;
+             i++)
+        {
+            item[headers[i - 1]] =
+                cells[i].InnerText.Trim();
         }
+
+        result.Add(item);
+    }
+
+    return result;
+}
     }
 }
