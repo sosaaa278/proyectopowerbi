@@ -1,138 +1,352 @@
-using System.IO;
 using HtmlAgilityPack;
 using Microsoft.Playwright;
+using System.IO;
+using DashboardAPI.Data;
+using DashboardAPI.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace DashboardAPI.Services
 {
     public class WebScraperService
     {
-      public async Task<List<Dictionary<string, string>>> GetTableData(string url)
+
+        private readonly AppDbContext _context;
+
+public WebScraperService(
+    AppDbContext context)
 {
-    var result = new List<Dictionary<string, string>>();
+    _context = context;
+}
+        public async Task<List<Dictionary<string, string>>> GetTableData(
+            string url, 
+            string fechaDesde,
+            string fechaHasta)
+        {
+            var result =
+                new List<Dictionary<string, string>>();
 
-    using var playwright = await Playwright.CreateAsync();
-
-    var userDataDir =
-        Path.Combine(
-            Environment.GetFolderPath(
-                Environment.SpecialFolder.LocalApplicationData),
-            "PlaywrightProfile");
-
-    var context =
-        await playwright.Chromium.LaunchPersistentContextAsync(
+            using var playwright =
+                await Playwright.CreateAsync();
+var userDataDir =
+    Path.Combine(
+        Directory.GetCurrentDirectory(),
+        "playwright-data");
+var context =
+    await playwright.Chromium
+        .LaunchPersistentContextAsync(
             userDataDir,
             new BrowserTypeLaunchPersistentContextOptions
             {
                 Headless = false,
-                Channel = "msedge"
+
+                Channel = "msedge",
+
+                UserAgent =
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+
+                SlowMo = 500,
+
+                Args = new[]
+                {
+                    "--start-minimized"
+                }
+            });
+            var page =
+                context.Pages.FirstOrDefault()
+                ?? await context.NewPageAsync();
+
+            // =========================
+            // ABRIR URL
+            // =========================
+
+            bool loaded = false;
+
+int retries = 0;
+
+while (!loaded && retries < 3)
+{
+    try
+    {
+        await page.GotoAsync(
+            url,
+            new PageGotoOptions
+            {
+                WaitUntil =
+                    WaitUntilState.DOMContentLoaded,
+
+                Timeout = 300000
             });
 
-    var page =
-        context.Pages.FirstOrDefault()
-        ?? await context.NewPageAsync();
-
-    await page.GotoAsync(
-        url,
-        new PageGotoOptions
-        {
-            WaitUntil = WaitUntilState.DOMContentLoaded,
-            Timeout = 120000
-        });
-
-    // =========================
-    // FILTROS AUTOMÁTICOS
-    // =========================
-
-    await page.SelectOptionAsync(
-        "select[name='cveDivision']",
-        "DC000");
-
-    await page.SelectOptionAsync(
-        "select[name='cveZona']",
-        "00000");
-
-    await page.SelectOptionAsync(
-        "select[name='cveArea']",
-        "00000");
-
-    await page.SelectOptionAsync(
-        "select[name='cveProceso']",
-        "D");
-
-    await page.SelectOptionAsync(
-        "select[name='cveProcImproc']",
-        "T");
-
-    // =========================
-    // CLICK PROCESA
-    // =========================
-
-    await page.ClickAsync("#procesa");
-
-    // =========================
-    // ESPERAR TABLA FINAL
-    // =========================
-
-    await page.WaitForSelectorAsync(
-        "#TABLE_12",
-        new PageWaitForSelectorOptions
-        {
-            Timeout = 120000
-        });
-
-    await page.WaitForTimeoutAsync(5000);
-
-    var html = await page.ContentAsync();
-
-    var doc = new HtmlDocument();
-
-    doc.LoadHtml(html);
-
-    var table =
-        doc.DocumentNode.SelectSingleNode(
-            "//table[@id='TABLE_12']");
-
-    if (table == null)
-        return result;
-
-    var rows =
-        table.SelectNodes(".//tbody/tr");
-
-    if (rows == null)
-        return result;
-
-    var headers =
-        table.SelectNodes(".//thead/tr[2]/th")
-        .Select(h => h.InnerText.Trim())
-        .ToList();
-
-    headers.Insert(0, "AREA");
-
-    foreach (var row in rows)
+        loaded = true;
+    }
+    catch
     {
-        var cells = row.SelectNodes("./td");
+        retries++;
 
-        if (cells == null || cells.Count < 2)
-            continue;
+        await Task.Delay(3000);
+    }
+}
 
-        var item =
-            new Dictionary<string, string>();
+await page.WaitForTimeoutAsync(3000);
 
-        item["AREA"] =
-            cells[1].InnerText.Trim();
+            // =========================
+            // ESPERAR FORMULARIO
+            // =========================
 
-        for (int i = 2;
-             i < cells.Count && i - 2 < headers.Count - 1;
-             i++)
-        {
-            item[headers[i - 1]] =
-                cells[i].InnerText.Trim();
+            await page.WaitForSelectorAsync(
+                "select[name='cveDivision']",
+                  new()
+    {
+        Timeout = 300000
+    });
+
+            // =========================
+            // SELECCIONAR FILTROS
+            // =========================
+
+            await page.SelectOptionAsync(
+                "select[name='cveDivision']",
+                "DC000");
+
+            await page.WaitForTimeoutAsync(1000);
+
+            await page.SelectOptionAsync(
+                "select[name='cveZona']",
+                "00000");
+
+            await page.WaitForTimeoutAsync(1000);
+
+            await page.SelectOptionAsync(
+                "select[name='cveArea']",
+                "00000");
+
+            await page.WaitForTimeoutAsync(1000);
+
+            await page.SelectOptionAsync(
+                "select[name='cveProceso']",
+                "D");
+
+            await page.WaitForTimeoutAsync(1000);
+
+            await page.SelectOptionAsync(
+                "select[name='cveProcImproc']",
+                "T");
+
+
+
+            await page.WaitForTimeoutAsync(1000);
+
+            // =========================
+// FECHAS
+// =========================
+
+await page.FillAsync(
+    "input[name='fechaDesde']",
+    fechaDesde);
+
+await page.FillAsync(
+    "input[name='fechaHasta']",
+    fechaHasta);
+
+await page.WaitForTimeoutAsync(1000);
+
+
+
+            // =========================
+            // CLICK PROCESA
+            // =========================
+
+            await page.ClickAsync("#procesa");
+
+            // =========================
+            // ESPERAR TABLA
+            // =========================
+
+            await page.WaitForTimeoutAsync(10000);
+
+            // =========================
+            // OBTENER HTML
+            // =========================
+
+            var html =
+                await page.ContentAsync();
+
+            File.WriteAllText(
+                "debug.html",
+                html);
+
+            var doc =
+                new HtmlDocument();
+
+            doc.LoadHtml(html);
+
+            // =========================
+            // TABLA REAL
+            // =========================
+
+            var table =
+                doc.DocumentNode.SelectSingleNode(
+                    "//table[@id='TABLE_12']");
+
+            if (table == null)
+                return result;
+
+            // =========================
+            // HEADERS REALES
+            // =========================
+
+            var headerCells =
+                table.SelectNodes(".//tr[2]/th");
+
+            if (headerCells == null)
+                return result;
+
+            var headers =
+    new List<string>();
+
+// HEADERS FIJOS
+headers.Add("SEC");
+headers.Add("AREA");
+
+// HEADERS DINÁMICOS
+foreach (var header in headerCells)
+{
+    var text =
+        header.InnerText.Trim();
+
+    if (!string.IsNullOrWhiteSpace(text))
+    {
+        headers.Add(text);
+    }
+}
+
+            // =========================
+            // FILAS REALES
+            // =========================
+
+            var rows =
+                table.SelectNodes(".//tr");
+
+            if (rows == null)
+                return result;
+
+            foreach (var row in rows.Skip(2))
+{
+    var cells =
+        row.SelectNodes("./td");
+
+    if (cells == null)
+        continue;
+
+    if (cells.Count < 3)
+        continue;
+
+    var item =
+        new Dictionary<string, string>();
+
+    // =========================
+    // SEC
+    // =========================
+
+    item["SEC"] =
+        cells[0].InnerText.Trim();
+
+    // =========================
+    // AREA
+    // =========================
+
+    item["AREA"] =
+        cells[1].InnerText.Trim();
+
+    // =========================
+    // COLUMNAS DINÁMICAS
+
+for (int i = 2;
+     i < cells.Count;
+     i++)
+{
+    int headerIndex = i;
+
+    if (headerIndex >= headers.Count)
+        break;
+
+    item[headers[headerIndex]] =
+        cells[i].InnerText.Trim();
+}
+
+    result.Add(item);
+foreach (var key in item.Keys)
+{
+    if (key == "SEC" || key == "AREA")
+        continue;
+
+    // =========================
+    // VALIDAR DUPLICADO
+    // =========================
+
+    var exists =
+        await _context.Inconformidades
+            .AnyAsync(x =>
+
+                x.FechaConsulta.Date ==
+                    DateTime.Parse(fechaHasta).Date
+
+                &&
+
+                x.SEC == item["SEC"]
+
+                &&
+
+                x.AREA == item["AREA"]
+
+                &&
+
+                x.Codigo == key
+            );
+
+    // =========================
+    // SOLO GUARDAR SI NO EXISTE
+    // =========================
+
+    if (!exists)
+    {
+        var inconformidad =
+            new Inconformidad
+            {
+                FechaConsulta =
+                    DateTime.Parse(fechaHasta),
+
+                SEC = item["SEC"],
+
+                AREA = item["AREA"],
+
+                Codigo = key,
+
+                Valor = item[key]
+            };
+
+        _context.Inconformidades.Add(
+            inconformidad);
+    }
+}
+}
+
+await _context.SaveChangesAsync();
+            return result;
         }
 
-        result.Add(item);
-    }
-
-    return result;
+        public async Task<List<Dictionary<string, string>>>
+GetComparisonData(
+    string url,
+    string fechaDesde,
+    string fechaHasta)
+{
+    return await GetTableData(
+        url,
+        fechaDesde,
+        fechaHasta);
 }
     }
+
+    
 }

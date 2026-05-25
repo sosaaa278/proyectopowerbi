@@ -1,4 +1,6 @@
 using DashboardAPI.Services;
+using DashboardAPI.Data;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +22,11 @@ builder.Services.AddCors(options =>
                   .AllowAnyMethod();
         });
 });
+
+builder.Services.AddDbContext<AppDbContext>(
+    options =>
+        options.UseSqlite(
+            "Data Source=inconformidades.db"));
 
 var app = builder.Build();
 
