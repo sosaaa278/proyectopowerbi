@@ -1,0 +1,221 @@
+<div class="container mt-4">
+
+  <h1 class="mb-4">
+    Analytics Dashboard
+  </h1>
+
+  <div class="row mb-4">
+
+  <div class="col-md-12">
+
+    <button
+      class="btn btn-primary w-100"
+      (click)="loadData()">
+
+      Generar Dashboard
+
+    </button>
+
+  </div>
+
+</div>
+
+  <div class="row mb-4">
+
+    <div class="col-md-4">
+      <div class="card shadow p-3">
+        <h5>Total Registros</h5>
+        <h2>{{ totalRecords }}</h2>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card shadow p-3">
+        <h5>Tabla Detectada</h5>
+        <h2>{{ tableDetected }}</h2>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card shadow p-3">
+        <h5>Status</h5>
+        <h2>{{ status }}</h2>
+      </div>
+    </div>
+
+  </div>
+
+
+
+  <h2>Comparativo 2025 vs 2026</h2>
+
+  <select
+  #codeSelect
+  class="form-select mb-3"
+  (change)="loadCompareByCode(codeSelect.value)">
+
+  
+  <option value="30202">30202</option>
+
+  <option value="E02">E02</option>
+
+  <option value="E03">E03</option>
+
+  <option value="E04">E04</option>
+
+  <option value="E05">E05</option>
+
+<option value="E06">E06</option>
+
+<option value="E07">E07</option>
+
+<option value="Q07">Q07</option>
+
+
+</select>
+
+<button
+  class="btn btn-primary mb-3 ms-2"
+  (click)="exportChart()">
+
+  Exportar Gráfica
+
+</button>
+
+<canvas id="compareChart"></canvas>
+
+  <div class="card shadow p-4">
+
+    <h3 class="mb-3">Datos Obtenidos</h3>
+
+    <button
+  class="btn btn-success mb-3"
+  (click)="exportExcel()">
+
+  Exportar Excel
+
+</button>
+
+    <div class="table-responsive">
+
+      <table class="table table-bordered table-striped">
+
+        <thead>
+          <tr>
+            <th *ngFor="let column of columns">
+              {{ column }}
+            </th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          <tr *ngFor="let row of tableData">
+
+            <td *ngFor="let column of columns">
+              {{ row[column] }}
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+      <div class="card shadow p-4 mt-4">
+
+  <h3>
+    Comparativo 2025 vs 2026
+  </h3>
+
+  <div class="table-responsive">
+
+    <table
+      class="table table-bordered">
+
+      <thead>
+
+        <tr>
+
+          <th>Área</th>
+
+          <th>2025</th>
+
+          <th>2026</th>
+
+          <th>Variación %</th>
+
+        </tr>
+
+      </thead>
+
+      <tbody>
+
+        <tr
+          *ngFor="
+            let item of compareData
+          ">
+
+          <td>
+            {{ item.area }}
+          </td>
+
+          <!-- 2025 -->
+
+          <td
+            [ngStyle]="{
+              'background-color':
+                item.total2026 >
+                item.total2025
+                ? '#ffcccc'
+                : '#ccffcc'
+            }">
+
+            {{ item.total2025 }}
+
+          </td>
+
+          <!-- 2026 -->
+
+          <td
+            [ngStyle]="{
+              'background-color':
+                item.total2026 >
+                item.total2025
+                ? '#ffcccc'
+                : '#ccffcc'
+            }">
+
+            {{ item.total2026 }}
+
+          </td>
+
+          <!-- VARIACIÓN -->
+
+          <td
+            [ngStyle]="{
+              'background-color':
+                item.variacion > 0
+                ? '#ffcccc'
+                : '#ccffcc'
+            }">
+
+            {{ item.variacion }} %
+
+          </td>
+
+        </tr>
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+</div>
+
+    </div>
+
+  </div>
+
+</div>
