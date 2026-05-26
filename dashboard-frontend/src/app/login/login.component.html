@@ -1,0 +1,48 @@
+<div class="login-wrapper">
+  <div class="login-card">
+
+    <div class="login-header">
+      <div class="login-logo">IMU</div>
+      <h1>Dashboard de Inconformidades</h1>
+      <p>CFE — Ingresa tus credenciales</p>
+    </div>
+
+    <form (ngSubmit)="login()">
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Usuario</label>
+        <input
+          type="text"
+          class="form-control"
+          [(ngModel)]="username"
+          name="username"
+          autocomplete="username"
+          placeholder="Nombre de usuario"
+          required>
+      </div>
+
+      <div class="mb-4">
+        <label class="form-label fw-semibold">Contraseña</label>
+        <input
+          type="password"
+          class="form-control"
+          [(ngModel)]="password"
+          name="password"
+          autocomplete="current-password"
+          placeholder="Contraseña"
+          required>
+      </div>
+
+      <div *ngIf="error" class="alert alert-danger py-2 mb-3">
+        {{ error }}
+      </div>
+
+      <button
+        type="submit"
+        class="btn btn-primary w-100 fw-semibold"
+        [disabled]="loading">
+        {{ loading ? 'Ingresando...' : 'Ingresar' }}
+      </button>
+    </form>
+
+  </div>
+</div>

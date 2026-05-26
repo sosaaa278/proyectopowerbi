@@ -1,4 +1,5 @@
 using DashboardAPI.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using DashboardAPI.Data;
 using DashboardAPI.Models;
@@ -6,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DashboardAPI.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class DataController : ControllerBase

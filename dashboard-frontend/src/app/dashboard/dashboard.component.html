@@ -1,253 +1,284 @@
-<div class="container mt-4">
+<div class="dashboard-wrapper">
 
-  <h1 class="mb-4">
-    Analytics Dashboard
-  </h1>
-
-  <div class="row mb-4">
-
-  <div class="col-md-12">
-
-    <button
-      class="btn btn-primary w-100"
-      (click)="loadData()">
-
-      Generar Dashboard
-
+  <!-- ==============================
+       ENCABEZADO
+  =============================== -->
+  <div class="dash-header d-flex justify-content-between align-items-start">
+    <div>
+      <h1>Dashboard de Inconformidades (IMU)</h1>
+      <p class="dash-subtitle">Comparativo anual 2025 vs 2026 — CFE</p>
+    </div>
+    <button class="btn btn-outline-secondary btn-sm mt-1" (click)="auth.logout()">
+      Cerrar sesión
     </button>
-
   </div>
 
-</div>
-
+  <!-- ==============================
+       BOTÓN PRINCIPAL
+  =============================== -->
   <div class="row mb-4">
+    <div class="col-md-12">
+      <button class="btn btn-primary w-100 btn-generate" (click)="loadData()">
+        Generar Dashboard
+      </button>
+    </div>
+  </div>
+
+  <!-- ==============================
+       TARJETAS DE ESTADO
+  =============================== -->
+  <div class="row mb-4 g-3">
 
     <div class="col-md-4">
-      <div class="card shadow p-3">
-        <h5>Total Registros</h5>
-        <h2>{{ totalRecords }}</h2>
+      <div class="kpi-card">
+        <span class="kpi-label">Total Registros 2026</span>
+        <span class="kpi-value">{{ totalRecords }}</span>
       </div>
     </div>
 
     <div class="col-md-4">
-      <div class="card shadow p-3">
-        <h5>Tabla Detectada</h5>
-        <h2>{{ tableDetected }}</h2>
+      <div class="kpi-card" [ngClass]="{ 'kpi-success': tableDetected === 'YES', 'kpi-neutral': tableDetected === 'NO' }">
+        <span class="kpi-label">Tabla Detectada</span>
+        <span class="kpi-value">{{ tableDetected }}</span>
       </div>
     </div>
 
     <div class="col-md-4">
-      <div class="card shadow p-3">
-        <h5>Status</h5>
-        <h2>{{ status }}</h2>
+      <div class="kpi-card"
+        [ngClass]="{
+          'kpi-success': status === 'SUCCESS',
+          'kpi-warning': status === 'LOADING',
+          'kpi-danger':  status === 'ERROR',
+          'kpi-neutral': status === 'WAITING'
+        }">
+        <span class="kpi-label">Estado</span>
+        <span class="kpi-value">{{ status }}</span>
       </div>
     </div>
 
   </div>
 
+  <!-- ==============================
+       KPIs ANALÍTICOS (visible solo si hay datos)
+  =============================== -->
+  <div *ngIf="hasKpi" class="kpi-analytics-section mb-4">
 
+    <h5 class="section-title">
+      Resumen analítico
+      <span *ngIf="selectedCode" class="badge-code">{{ selectedCode }}</span>
+    </h5>
 
-  <h2>Comparativo 2025 vs 2026</h2>
+    <div class="row g-3">
 
-  <select
-  #codeSelect
-  class="form-select mb-3"
-  (change)="loadCompareByCode(codeSelect.value)">
+      <!-- Totales -->
+      <div class="col-md-3 col-6">
+        <div class="kpi-card kpi-neutral">
+          <span class="kpi-label">Total 2025</span>
+          <span class="kpi-value">{{ kpiTotal2025 | number }}</span>
+        </div>
+      </div>
 
-  
-  <option value="30202">30202</option>
+      <div class="col-md-3 col-6">
+        <div class="kpi-card"
+          [ngClass]="kpiVariacionTotal > 0 ? 'kpi-danger' : kpiVariacionTotal < 0 ? 'kpi-success' : 'kpi-neutral'">
+          <span class="kpi-label">Total 2026</span>
+          <span class="kpi-value">{{ kpiTotal2026 | number }}</span>
+        </div>
+      </div>
 
-  <option value="E02">E02</option>
+      <div class="col-md-3 col-6">
+        <div class="kpi-card"
+          [ngClass]="kpiVariacionTotal > 0 ? 'kpi-danger' : kpiVariacionTotal < 0 ? 'kpi-success' : 'kpi-neutral'">
+          <span class="kpi-label">Variación Total</span>
+          <span class="kpi-value">
+            <span class="trend-icon">
+              {{ kpiVariacionTotal > 0 ? '▲' : kpiVariacionTotal < 0 ? '▼' : '→' }}
+            </span>
+            {{ kpiVariacionTotal | number:'1.1-1' }}%
+          </span>
+        </div>
+      </div>
 
-  <option value="E03">E03</option>
+      <!-- Conteo de áreas -->
+      <div class="col-md-3 col-6">
+        <div class="kpi-card kpi-info">
+          <span class="kpi-label">Distribución de Áreas</span>
+          <div class="area-dist">
+            <span class="dist-badge badge-alza">▲ {{ kpiAreasAlza }}</span>
+            <span class="dist-badge badge-baja">▼ {{ kpiAreasBaja }}</span>
+            <span class="dist-badge badge-igual">→ {{ kpiAreasSinCambio }}</span>
+          </div>
+        </div>
+      </div>
 
-  <option value="E04">E04</option>
+      <!-- Área que más empeoró -->
+      <div class="col-md-6">
+        <div class="kpi-card kpi-danger-soft">
+          <span class="kpi-label">Área con mayor incremento (alerta)</span>
+          <span class="kpi-value kpi-value-sm">{{ kpiWorstArea || '—' }}</span>
+        </div>
+      </div>
 
-  <option value="E05">E05</option>
+      <!-- Área que más mejoró -->
+      <div class="col-md-6">
+        <div class="kpi-card kpi-success-soft">
+          <span class="kpi-label">Área con mayor reducción (logro)</span>
+          <span class="kpi-value kpi-value-sm">{{ kpiBestArea || '—' }}</span>
+        </div>
+      </div>
 
-<option value="E06">E06</option>
-
-<option value="E07">E07</option>
-
-<option value="Q07">Q07</option>
-
-
-</select>
-
-<button
-  class="btn btn-primary mb-3 ms-2"
-  (click)="exportChart()">
-
-  Exportar Gráfica
-
-</button>
-
-<div class="row mb-3">
-  <div class="col-md-4">
-    <label for="chartTypeSelect" class="form-label">
-      Tipo de gráfica
-    </label>
-
-    <select
-      id="chartTypeSelect"
-      class="form-select"
-      [(ngModel)]="chartType"
-      (change)="onChartTypeChange(chartType)">
-
-      <option value="bar">Barras verticales</option>
-      <option value="line">Línea</option>
-      <option value="horizontalBar">Barras horizontales</option>
-
-    </select>
+    </div>
   </div>
-</div>
 
-<canvas id="compareChart"></canvas>
+  <!-- ==============================
+       CONTROLES DE GRÁFICA
+  =============================== -->
+  <div class="chart-controls card shadow-sm p-3 mb-3">
 
-  <div class="card shadow p-4">
+    <div class="row g-3 align-items-end">
 
-    <h3 class="mb-3">Datos Obtenidos</h3>
+      <div class="col-md-5">
+        <label class="form-label fw-semibold">Tipo de inconformidad</label>
+        <select
+          #codeSelect
+          class="form-select"
+          (change)="loadCompareByCode(codeSelect.value)">
+          <option value="30202">30202</option>
+          <option value="E02">E02</option>
+          <option value="E03">E03</option>
+          <option value="E04">E04</option>
+          <option value="E05">E05</option>
+          <option value="E06">E06</option>
+          <option value="E07">E07</option>
+          <option value="Q07">Q07</option>
+        </select>
+      </div>
 
-    <button
-  class="btn btn-success mb-3"
-  (click)="exportExcel()">
+      <div class="col-md-4">
+        <label class="form-label fw-semibold">Tipo de gráfica</label>
+        <select
+          id="chartTypeSelect"
+          class="form-select"
+          [(ngModel)]="chartType"
+          (change)="onChartTypeChange(chartType)">
+          <option value="bar">Barras verticales</option>
+          <option value="line">Línea (tendencia)</option>
+          <option value="horizontalBar">Barras horizontales</option>
+          <option value="pie">Pastel (distribución por año)</option>
+        </select>
+      </div>
 
-  Exportar Excel
+      <div class="col-md-3 d-flex gap-2">
+        <button class="btn btn-outline-secondary flex-fill" (click)="exportChart()">
+          Exportar gráfica
+        </button>
+      </div>
 
-</button>
+    </div>
 
+    <!-- Selector de año para pastel -->
+    <div *ngIf="chartType === 'pie'" class="pie-year-row mt-3">
+      <span class="fw-semibold me-2" style="font-size:0.85rem;">Año:</span>
+      <div class="btn-group btn-group-sm">
+        <button class="btn"
+          [class.btn-primary]="pieYear === '2026'"
+          [class.btn-outline-secondary]="pieYear !== '2026'"
+          (click)="onPieYearChange('2026')">2026</button>
+        <button class="btn"
+          [class.btn-primary]="pieYear === '2025'"
+          [class.btn-outline-secondary]="pieYear !== '2025'"
+          (click)="onPieYearChange('2025')">2025</button>
+      </div>
+    </div>
+
+    <!-- Leyenda semafórica (solo visible en barras) -->
+    <div *ngIf="chartType === 'bar' || chartType === 'horizontalBar'" class="legend-bar mt-3">
+      <span class="legend-dot dot-red"></span><span>2026 mayor que 2025 (peor)</span>
+      <span class="legend-dot dot-green ms-3"></span><span>2026 menor que 2025 (mejor)</span>
+      <span class="legend-dot dot-gray ms-3"></span><span>Sin cambio</span>
+    </div>
+
+  </div>
+
+  <!-- ==============================
+       GRÁFICA
+  =============================== -->
+  <div class="chart-container card shadow-sm p-3 mb-4">
+    <canvas id="compareChart"></canvas>
+  </div>
+
+  <!-- ==============================
+       TABLAS
+  =============================== -->
+
+  <!-- Tabla de datos crudos -->
+  <div *ngIf="tableData.length > 0" class="card shadow-sm p-4 mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h3 class="mb-0">Datos obtenidos (2026)</h3>
+      <button class="btn btn-success btn-sm" (click)="exportExcel()">Exportar Excel</button>
+    </div>
     <div class="table-responsive">
-
-      <table class="table table-bordered table-striped">
-
-        <thead>
+      <table class="table table-bordered table-striped table-sm">
+        <thead class="table-dark">
           <tr>
-            <th *ngFor="let column of columns">
-              {{ column }}
-            </th>
+            <th *ngFor="let column of columns">{{ column }}</th>
           </tr>
         </thead>
-
         <tbody>
+          <tr *ngFor="let row of tableData"
+            [ngClass]="{ 'fw-bold table-secondary': isTotal(row['AREA']) }">
+            <td *ngFor="let column of columns">{{ row[column] }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 
-          <tr *ngFor="let row of tableData">
+  <!-- Tabla comparativa -->
+  <div *ngIf="compareData.length > 0" class="card shadow-sm p-4 mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h3 class="mb-0">
+        Comparativo 2025 vs 2026
+        <span *ngIf="selectedCode" class="badge-code ms-2">{{ selectedCode }}</span>
+      </h3>
+      <button class="btn btn-success btn-sm" (click)="exportCompareExcel()">Exportar Excel</button>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-bordered table-sm">
+        <thead class="table-dark">
+          <tr>
+            <th>Área</th>
+            <th>2025</th>
+            <th>2026</th>
+            <th>Variación %</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            *ngFor="let item of compareData"
+            [ngClass]="{ 'fw-bold table-secondary': isTotal(item.area) }">
 
-            <td *ngFor="let column of columns">
-              {{ row[column] }}
+            <td>{{ item.area }}</td>
+
+            <td [ngStyle]="{ 'background-color': !isTotal(item.area) && item.total2026 > item.total2025 ? 'rgba(220,53,69,0.12)' : !isTotal(item.area) && item.total2026 < item.total2025 ? 'rgba(40,167,69,0.12)' : '' }">
+              {{ item.total2025 | number }}
+            </td>
+
+            <td [ngStyle]="{ 'background-color': !isTotal(item.area) && item.total2026 > item.total2025 ? 'rgba(220,53,69,0.12)' : !isTotal(item.area) && item.total2026 < item.total2025 ? 'rgba(40,167,69,0.12)' : '' }">
+              {{ item.total2026 | number }}
+            </td>
+
+            <td [ngStyle]="{ 'background-color': !isTotal(item.area) && item.variacion > 0 ? 'rgba(220,53,69,0.12)' : !isTotal(item.area) && item.variacion < 0 ? 'rgba(40,167,69,0.12)' : '' }">
+              <span class="trend-icon">
+                {{ !isTotal(item.area) ? (item.variacion > 0 ? '▲' : item.variacion < 0 ? '▼' : '→') : '' }}
+              </span>
+              {{ item.variacion | number:'1.1-1' }} %
             </td>
 
           </tr>
-
         </tbody>
-
       </table>
-
-      <div class="card shadow p-4 mt-4">
-
-  <h3>
-    Comparativo 2025 vs 2026
-  </h3>
-
-  <button
-    class="btn btn-success mb-3"
-    (click)="exportCompareExcel()">
-
-    Exportar Excel
-
-  </button>
-
-  <div class="table-responsive">
-
-    <table
-      class="table table-bordered">
-
-      <thead>
-
-        <tr>
-
-          <th>Área</th>
-
-          <th>2025</th>
-
-          <th>2026</th>
-
-          <th>Variación %</th>
-
-        </tr>
-
-      </thead>
-
-      <tbody>
-
-        <tr
-          *ngFor="
-            let item of compareData
-          ">
-
-          <td>
-            {{ item.area }}
-          </td>
-
-          <!-- 2025 -->
-
-          <td
-            [ngStyle]="{
-              'background-color':
-                item.total2026 > item.total2025
-                  ? 'rgba(255,0,0,0.18)'
-                  : item.total2026 < item.total2025
-                    ? 'rgba(0,200,0,0.18)'
-                    : 'transparent'
-            }">
-
-            {{ item.total2025 }}
-
-          </td>
-
-          <!-- 2026 -->
-
-          <td
-            [ngStyle]="{
-              'background-color':
-                item.total2026 > item.total2025
-                  ? 'rgba(255,0,0,0.18)'
-                  : item.total2026 < item.total2025
-                    ? 'rgba(0,200,0,0.18)'
-                    : 'transparent'
-            }">
-
-            {{ item.total2026 }}
-
-          </td>
-
-          <!-- VARIACIÓN -->
-
-          <td
-            [ngStyle]="{
-              'background-color':
-                item.variacion > 0
-                  ? 'rgba(255,0,0,0.18)'
-                  : item.variacion < 0
-                    ? 'rgba(0,200,0,0.18)'
-                    : 'transparent'
-            }">
-
-            {{ item.variacion }} %
-
-          </td>
-
-        </tr>
-
-      </tbody>
-
-    </table>
-
-  </div>
-
-</div>
-
     </div>
-
   </div>
 
 </div>

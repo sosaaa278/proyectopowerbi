@@ -1,0 +1,5 @@
+{
+  "buildCommand": "npm run build -- --configuration=production",
+  "outputDirectory": "dist/dashboard-frontend",
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+}

@@ -31,26 +31,26 @@ var userDataDir =
     Path.Combine(
         Directory.GetCurrentDirectory(),
         "playwright-data");
+var isWindows = OperatingSystem.IsWindows();
+
+var launchOptions =
+    new BrowserTypeLaunchPersistentContextOptions
+    {
+        Headless = true,
+
+        Channel = isWindows ? "msedge" : null,
+
+        UserAgent =
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+
+        SlowMo = 500,
+
+        Args = ["--no-sandbox", "--disable-setuid-sandbox"]
+    };
+
 var context =
     await playwright.Chromium
-        .LaunchPersistentContextAsync(
-            userDataDir,
-            new BrowserTypeLaunchPersistentContextOptions
-            {
-                Headless = false,
-
-                Channel = "msedge",
-
-                UserAgent =
-                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-
-                SlowMo = 500,
-
-                Args = new[]
-                {
-                    "--start-minimized"
-                }
-            });
+        .LaunchPersistentContextAsync(userDataDir, launchOptions);
             var page =
                 context.Pages.FirstOrDefault()
                 ?? await context.NewPageAsync();
