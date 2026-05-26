@@ -82,6 +82,26 @@
 
 </button>
 
+<div class="row mb-3">
+  <div class="col-md-4">
+    <label for="chartTypeSelect" class="form-label">
+      Tipo de gráfica
+    </label>
+
+    <select
+      id="chartTypeSelect"
+      class="form-select"
+      [(ngModel)]="chartType"
+      (change)="onChartTypeChange(chartType)">
+
+      <option value="bar">Barras verticales</option>
+      <option value="line">Línea</option>
+      <option value="horizontalBar">Barras horizontales</option>
+
+    </select>
+  </div>
+</div>
+
 <canvas id="compareChart"></canvas>
 
   <div class="card shadow p-4">
