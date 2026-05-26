@@ -11,6 +11,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<WebScraperService>();
+builder.Services.AddSingleton<FullCompareService>();
 
 builder.Services.AddCors(options =>
 {

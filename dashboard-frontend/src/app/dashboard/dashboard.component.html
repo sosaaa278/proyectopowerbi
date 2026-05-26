@@ -148,6 +148,14 @@
     Comparativo 2025 vs 2026
   </h3>
 
+  <button
+    class="btn btn-success mb-3"
+    (click)="exportCompareExcel()">
+
+    Exportar Excel
+
+  </button>
+
   <div class="table-responsive">
 
     <table
@@ -185,10 +193,11 @@
           <td
             [ngStyle]="{
               'background-color':
-                item.total2026 >
-                item.total2025
-                ? '#ffcccc'
-                : '#ccffcc'
+                item.total2026 > item.total2025
+                  ? 'rgba(255,0,0,0.18)'
+                  : item.total2026 < item.total2025
+                    ? 'rgba(0,200,0,0.18)'
+                    : 'transparent'
             }">
 
             {{ item.total2025 }}
@@ -200,10 +209,11 @@
           <td
             [ngStyle]="{
               'background-color':
-                item.total2026 >
-                item.total2025
-                ? '#ffcccc'
-                : '#ccffcc'
+                item.total2026 > item.total2025
+                  ? 'rgba(255,0,0,0.18)'
+                  : item.total2026 < item.total2025
+                    ? 'rgba(0,200,0,0.18)'
+                    : 'transparent'
             }">
 
             {{ item.total2026 }}
@@ -216,8 +226,10 @@
             [ngStyle]="{
               'background-color':
                 item.variacion > 0
-                ? '#ffcccc'
-                : '#ccffcc'
+                  ? 'rgba(255,0,0,0.18)'
+                  : item.variacion < 0
+                    ? 'rgba(0,200,0,0.18)'
+                    : 'transparent'
             }">
 
             {{ item.variacion }} %

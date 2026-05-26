@@ -30,4 +30,12 @@ export class DashboardService {
       `http://localhost:5111/api/data/compare`
     );
   }
+
+  getFullCompare() {
+
+    return this.http.get<{
+      rawData2026: any[];
+      compare: {[code: string]: any[]};
+    }>(`http://localhost:5111/api/data/fullcompare`);
+  }
 }
