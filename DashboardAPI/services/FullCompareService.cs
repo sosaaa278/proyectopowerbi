@@ -80,6 +80,11 @@ namespace DashboardAPI.Services
 
         public void InvalidateCache() => _cache = null;
 
+        private static string CleanCell(HtmlNode cell) =>
+            System.Net.WebUtility.HtmlDecode(cell.InnerText)
+                .Replace(" ", "")
+                .Trim();
+
         private async Task<List<Dictionary<string, string>>> ScrapeYearAsync(
             IBrowserContext context,
             string url,
@@ -149,7 +154,7 @@ namespace DashboardAPI.Services
             var headers = new List<string> { "SEC", "AREA" };
             foreach (var header in headerCells)
             {
-                var text = header.InnerText.Trim();
+                var text = CleanCell(header);
                 if (!string.IsNullOrWhiteSpace(text))
                     headers.Add(text);
             }
@@ -163,13 +168,13 @@ namespace DashboardAPI.Services
                 if (cells == null || cells.Count < 3) continue;
 
                 var item = new Dictionary<string, string>();
-                item["SEC"] = cells[0].InnerText.Trim();
-                item["AREA"] = cells[1].InnerText.Trim();
+                item["SEC"] = CleanCell(cells[0]);
+                item["AREA"] = CleanCell(cells[1]);
 
                 for (int i = 2; i < cells.Count; i++)
                 {
                     if (i >= headers.Count) break;
-                    item[headers[i]] = cells[i].InnerText.Trim();
+                    item[headers[i]] = CleanCell(cells[i]);
                 }
 
                 result.Add(item);
@@ -209,8 +214,8 @@ namespace DashboardAPI.Services
                         double.TryParse(row2026[code].Replace(",", ""), out val2026);
 
                     double variacion = 0;
-                    if (val2025 > 0)
-                        variacion = ((val2026 - val2025) / val2025) * 100;
+                    if (val2025 > 0 || val2026 > 0)
+                        variacion = ((val2026 - val2025) / Math.Max(val2025, 1)) * 100;
 
                     comparativos.Add(new Comparativo
                     {

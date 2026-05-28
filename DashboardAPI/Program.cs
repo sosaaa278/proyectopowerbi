@@ -105,5 +105,8 @@ using (var scope = app.Services.CreateScope())
     db.Database.EnsureCreated();
 }
 
-var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
-app.Run($"http://+:{port}");
+var port = Environment.GetEnvironmentVariable("PORT");
+if (port != null)
+    app.Run($"http://+:{port}");
+else
+    app.Run();
