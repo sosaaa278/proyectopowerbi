@@ -2657,7 +2657,7 @@
 
 
 
-<script language="JavaScript" src="./calendario/popcalendar.js"></script></head><body class="fondo" topmargin="5"><div onclick="bShow=true" id="calendar" style="z-index:+999;position:absolute;visibility:hidden;"><table width="250" style="font-family:arial;font-size:11px;border-width:1;border-style:solid;border-color:#a0a0a0;font-family:arial; font-size:11px}" bgcolor="#ffffff" id="TABLE_1"><tbody><tr bgcolor="#006600"><td><table width="248" id="TABLE_2"><tbody><tr><td style="padding:2px;font-family:arial; font-size:11px;"><font color="#ffffff"><b><span id="caption"><span id="spanLeft" style="border-style:solid;border-width:1;border-color:#16E100;cursor:pointer" onmouseover="swapImage(&quot;changeLeft&quot;,&quot;left2.gif&quot;);this.style.borderColor=&quot;#18F200&quot;;window.status=&quot;Clic para desplegar el mes anterior. Presione el boton del mouse para desplegar automaticamente&quot;" onclick="javascript:decMonth()" onmouseout="clearInterval(intervalID1);swapImage(&quot;changeLeft&quot;,&quot;left1.gif&quot;);this.style.borderColor=&quot;#16E100&quot;;window.status=&quot;&quot;" onmousedown="clearTimeout(timeoutID1);timeoutID1=setTimeout(&quot;StartDecMonth()&quot;,500)" onmouseup="clearTimeout(timeoutID1);clearInterval(intervalID1)">&nbsp;<img id="changeLeft" src="calendario/images/left1.gif" width="10" height="11" border="0">&nbsp;</span>&nbsp;<span id="spanRight" style="border-style:solid;border-width:1;border-color:#16E100;cursor:pointer" onmouseover="swapImage(&quot;changeRight&quot;,&quot;right2.gif&quot;);this.style.borderColor=&quot;#18F200&quot;;window.status=&quot;Clic para desplegar el mes siguiente. Presione el boton del mouse para desplegar automaticamente&quot;" onmouseout="clearInterval(intervalID1);swapImage(&quot;changeRight&quot;,&quot;right1.gif&quot;);this.style.borderColor=&quot;#16E100&quot;;window.status=&quot;&quot;" onclick="incMonth()" onmousedown="clearTimeout(timeoutID1);timeoutID1=setTimeout(&quot;StartIncMonth()&quot;,500)" onmouseup="clearTimeout(timeoutID1);clearInterval(intervalID1)">&nbsp;<img id="changeRight" src="calendario/images/right1.gif" width="10" height="11" border="0">&nbsp;</span>&nbsp;<span id="spanMonth" style="border-style:solid;border-width:1;border-color:#16E100;cursor:pointer" onmouseover="swapImage(&quot;changeMonth&quot;,&quot;drop2.gif&quot;);this.style.borderColor=&quot;#18F200&quot;;window.status=&quot;Clic para seleccionar un mes&quot;" onmouseout="swapImage(&quot;changeMonth&quot;,&quot;drop1.gif&quot;);this.style.borderColor=&quot;#16E100&quot;;window.status=&quot;&quot;" onclick="popUpMonth()"></span>&nbsp;<span id="spanYear" style="border-style:solid;border-width:1;border-color:#16E100;cursor:pointer" onmouseover="swapImage(&quot;changeYear&quot;,&quot;drop2.gif&quot;);this.style.borderColor=&quot;#18F200&quot;;window.status=&quot;Clic para seleccionar un año&quot;" onmouseout="swapImage(&quot;changeYear&quot;,&quot;drop1.gif&quot;);this.style.borderColor=&quot;#16E100&quot;;window.status=&quot;&quot;" onclick="popUpYear()"></span>&nbsp;</span></b></font></td><td align="right"><a href="javascript:hideCalendar()"><img src="calendario/images/close.gif" width="15" height="13" border="0" alt="Cerrar el calendario"></a></td></tr></tbody></table></td></tr><tr><td style="padding:5px" bgcolor="#ffffff"><span id="content"></span></td></tr><tr bgcolor="#EBFFE6"><td style="padding:5px" align="center"><span id="lblToday">Hoy es <a onmousemove="window.status=&quot;Va al mes actual&quot;" onmouseout="window.status=&quot;&quot;" title="Va al mes actual" style="text-decoration:none;color:black;" href="javascript:monthSelected=monthNow;yearSelected=yearNow;constructCalendar();">Mar, 26 May	2026</a></span></td></tr></tbody></table></div><div id="selectMonth" style="z-index:+999;position:absolute;visibility:hidden;"></div><div id="selectYear" style="z-index:+999;position:absolute;visibility:hidden;"></div>
+<script language="JavaScript" src="./calendario/popcalendar.js"></script></head><body class="fondo" topmargin="5"><div onclick="bShow=true" id="calendar" style="z-index:+999;position:absolute;visibility:hidden;"><table width="250" style="font-family:arial;font-size:11px;border-width:1;border-style:solid;border-color:#a0a0a0;font-family:arial; font-size:11px}" bgcolor="#ffffff" id="TABLE_1"><tbody><tr bgcolor="#006600"><td><table width="248" id="TABLE_2"><tbody><tr><td style="padding:2px;font-family:arial; font-size:11px;"><font color="#ffffff"><b><span id="caption"><span id="spanLeft" style="border-style:solid;border-width:1;border-color:#16E100;cursor:pointer" onmouseover="swapImage(&quot;changeLeft&quot;,&quot;left2.gif&quot;);this.style.borderColor=&quot;#18F200&quot;;window.status=&quot;Clic para desplegar el mes anterior. Presione el boton del mouse para desplegar automaticamente&quot;" onclick="javascript:decMonth()" onmouseout="clearInterval(intervalID1);swapImage(&quot;changeLeft&quot;,&quot;left1.gif&quot;);this.style.borderColor=&quot;#16E100&quot;;window.status=&quot;&quot;" onmousedown="clearTimeout(timeoutID1);timeoutID1=setTimeout(&quot;StartDecMonth()&quot;,500)" onmouseup="clearTimeout(timeoutID1);clearInterval(intervalID1)">&nbsp;<img id="changeLeft" src="calendario/images/left1.gif" width="10" height="11" border="0">&nbsp;</span>&nbsp;<span id="spanRight" style="border-style:solid;border-width:1;border-color:#16E100;cursor:pointer" onmouseover="swapImage(&quot;changeRight&quot;,&quot;right2.gif&quot;);this.style.borderColor=&quot;#18F200&quot;;window.status=&quot;Clic para desplegar el mes siguiente. Presione el boton del mouse para desplegar automaticamente&quot;" onmouseout="clearInterval(intervalID1);swapImage(&quot;changeRight&quot;,&quot;right1.gif&quot;);this.style.borderColor=&quot;#16E100&quot;;window.status=&quot;&quot;" onclick="incMonth()" onmousedown="clearTimeout(timeoutID1);timeoutID1=setTimeout(&quot;StartIncMonth()&quot;,500)" onmouseup="clearTimeout(timeoutID1);clearInterval(intervalID1)">&nbsp;<img id="changeRight" src="calendario/images/right1.gif" width="10" height="11" border="0">&nbsp;</span>&nbsp;<span id="spanMonth" style="border-style:solid;border-width:1;border-color:#16E100;cursor:pointer" onmouseover="swapImage(&quot;changeMonth&quot;,&quot;drop2.gif&quot;);this.style.borderColor=&quot;#18F200&quot;;window.status=&quot;Clic para seleccionar un mes&quot;" onmouseout="swapImage(&quot;changeMonth&quot;,&quot;drop1.gif&quot;);this.style.borderColor=&quot;#16E100&quot;;window.status=&quot;&quot;" onclick="popUpMonth()"></span>&nbsp;<span id="spanYear" style="border-style:solid;border-width:1;border-color:#16E100;cursor:pointer" onmouseover="swapImage(&quot;changeYear&quot;,&quot;drop2.gif&quot;);this.style.borderColor=&quot;#18F200&quot;;window.status=&quot;Clic para seleccionar un año&quot;" onmouseout="swapImage(&quot;changeYear&quot;,&quot;drop1.gif&quot;);this.style.borderColor=&quot;#16E100&quot;;window.status=&quot;&quot;" onclick="popUpYear()"></span>&nbsp;</span></b></font></td><td align="right"><a href="javascript:hideCalendar()"><img src="calendario/images/close.gif" width="15" height="13" border="0" alt="Cerrar el calendario"></a></td></tr></tbody></table></td></tr><tr><td style="padding:5px" bgcolor="#ffffff"><span id="content"></span></td></tr><tr bgcolor="#EBFFE6"><td style="padding:5px" align="center"><span id="lblToday">Hoy es <a onmousemove="window.status=&quot;Va al mes actual&quot;" onmouseout="window.status=&quot;&quot;" title="Va al mes actual" style="text-decoration:none;color:black;" href="javascript:monthSelected=monthNow;yearSelected=yearNow;constructCalendar();">Jue, 28 May	2026</a></span></td></tr></tbody></table></div><div id="selectMonth" style="z-index:+999;position:absolute;visibility:hidden;"></div><div id="selectYear" style="z-index:+999;position:absolute;visibility:hidden;"></div>
 <script type="text/javascript" src="lib/milonic_src.js"></script>
 <script type="text/javascript" src="lib/mmenudom.js"></script>
 <script type="text/javascript" src="lib/table.js"></script>
@@ -2684,8 +2684,8 @@
 			<a href="http://www.milonic.com/beginner.php" style="visibility: hidden">http://www.milonic.com/beginner.php</a>
 &nbsp;</td>
     <td colspan="4" width="40%" class="fecha"><div align="right">
-    Acceso: 16507844<br>
-		<span id="fechaHora"> Martes, 26 de Mayo 2026,11:08:50</span>
+    Acceso: 16518002<br>
+		<span id="fechaHora"> Jueves, 28 de Mayo 2026,11:02:21</span>
     	</div>
     </td>
   </tr>
@@ -2699,7 +2699,7 @@
 			<td><div align="center"><span class="tituloSubseccion"><div id="titulo"></div>ANALISIS POR PROCESO Y RESULTADO</span> </div></td>
 		</tr>
 		<tr>
-			 <td class="SubtituloVerde"><div align="center">DEL 1 DE ENERO AL 26 DE MAYO DEL 2026</div></td>
+			 <td class="SubtituloVerde"><div align="center">DEL 1 DE ENERO AL 28 DE MAYO DEL 2026</div></td>
 		</tr>
 	</tbody></table>
 	<table width="100%" align="right" border="0" id="TABLE_11">
@@ -2803,7 +2803,7 @@
 	    	 <a href="#" onclick="popUpCalendar(this,frmIESS.fechaDesde, 'yyyy/mm/dd')"><img src="imagenes/calendar.bmp" alt="Abrir calendario" width="14" height="14" border="0"></a>
 	    
 	         Hasta:
-	    	 <input class="textfields" type="text" name="fechaHasta" id="fechaHasta" size="15" value="2026/05/26">
+	    	 <input class="textfields" type="text" name="fechaHasta" id="fechaHasta" size="15" value="2026/05/28">
 	    	 <a href="#" onclick="popUpCalendar(this,frmIESS.fechaHasta, 'yyyy/mm/dd')"><img src="imagenes/calendar.bmp" alt="Abrir calendario" width="14" height="14" border="0"></a>
 	    	    </td>
 	    <td align="right">
@@ -2866,7 +2866,7 @@
 		<td align="center">1</td>
 		<td align="left">
 		
-			<a href="solTermino.asp?cveDivision=DC000&amp;cveZona=DC010&amp;cveArea=00000&amp;cveSector=0000000&amp;fechaDesde=2026/01/01&amp;fechaHasta=2026/05/26&amp;cveProceso=D&amp;cveProcImproc=T">DC010 CHIHUAHUA</a>
+			<a href="solTermino.asp?cveDivision=DC000&amp;cveZona=DC010&amp;cveArea=00000&amp;cveSector=0000000&amp;fechaDesde=2026/01/01&amp;fechaHasta=2026/05/28&amp;cveProceso=D&amp;cveProcImproc=T">DC010 CHIHUAHUA</a>
 		
 
 		</td>
@@ -2877,27 +2877,27 @@
 		</td>
 		
 		<td align="right">
-		445
+		449
 
 		</td>
 		
 		<td align="right">
-		988
+		1,004
 
 		</td>
 		
 		<td align="right">
-		154
+		157
 
 		</td>
 		
 		<td align="right">
-		185
+		192
 
 		</td>
 		
 		<td align="right">
-		442
+		449
 
 		</td>
 		
@@ -2907,14 +2907,14 @@
 		</td>
 		
 		<td align="right">
-		76
+		77
 
 		</td>
 		
 
 		<td align="right" bgcolor="#E1F4D0" style="font-weight:bold">
 		
-			<a href="solTermino.asp?cveDivision=DC000&amp;cveZona=DC010&amp;cveArea=00000&amp;cveSector=0000000&amp;fechaDesde=2026/01/01&amp;fechaHasta=2026/05/26&amp;cveProceso=D&amp;cveProcImproc=T">2,829</a>
+			<a href="solTermino.asp?cveDivision=DC000&amp;cveZona=DC010&amp;cveArea=00000&amp;cveSector=0000000&amp;fechaDesde=2026/01/01&amp;fechaHasta=2026/05/28&amp;cveProceso=D&amp;cveProcImproc=T">2,867</a>
 		
 		</td>
 		<td style="padding:0"><table width="22%" height="17" cellspacing="0" id="TABLE_13">
@@ -2922,50 +2922,50 @@
 			<td class="graficaIESS"></td>
 		  </tr>
 		</tbody></table></td>
-		<td align="center">21.66</td>
+		<td align="center">21.63</td>
 	</tr>
 
 	<tr class="celdaIESS alternate" height="16">
 		<td align="center">2</td>
 		<td align="left">
 		
-			<a href="solTermino.asp?cveDivision=DC000&amp;cveZona=DC040&amp;cveArea=00000&amp;cveSector=0000000&amp;fechaDesde=2026/01/01&amp;fechaHasta=2026/05/26&amp;cveProceso=D&amp;cveProcImproc=T">DC040 JUAREZ</a>
+			<a href="solTermino.asp?cveDivision=DC000&amp;cveZona=DC040&amp;cveArea=00000&amp;cveSector=0000000&amp;fechaDesde=2026/01/01&amp;fechaHasta=2026/05/28&amp;cveProceso=D&amp;cveProcImproc=T">DC040 JUAREZ</a>
 		
 
 		</td>
 		
 		<td align="right">
-		203
+		204
 
 		</td>
 		
 		<td align="right">
-		243
+		245
 
 		</td>
 		
 		<td align="right">
-		188
+		193
 
 		</td>
 		
 		<td align="right">
-		106
+		108
 
 		</td>
 		
 		<td align="right">
-		1,409
+		1,423
 
 		</td>
 		
 		<td align="right">
-		186
+		195
 
 		</td>
 		
 		<td align="right">
-		419
+		430
 
 		</td>
 		
@@ -2977,7 +2977,7 @@
 
 		<td align="right" bgcolor="#E1F4D0" style="font-weight:bold">
 		
-			<a href="solTermino.asp?cveDivision=DC000&amp;cveZona=DC040&amp;cveArea=00000&amp;cveSector=0000000&amp;fechaDesde=2026/01/01&amp;fechaHasta=2026/05/26&amp;cveProceso=D&amp;cveProcImproc=T">2,759</a>
+			<a href="solTermino.asp?cveDivision=DC000&amp;cveZona=DC040&amp;cveArea=00000&amp;cveSector=0000000&amp;fechaDesde=2026/01/01&amp;fechaHasta=2026/05/28&amp;cveProceso=D&amp;cveProcImproc=T">2,803</a>
 		
 		</td>
 		<td style="padding:0"><table width="21%" height="17" cellspacing="0" id="TABLE_14">
@@ -2985,14 +2985,14 @@
 			<td class="graficaIESS"></td>
 		  </tr>
 		</tbody></table></td>
-		<td align="center">21.12</td>
+		<td align="center">21.14</td>
 	</tr>
 
 	<tr class="celdaIESS" height="16">
 		<td align="center">3</td>
 		<td align="left">
 		
-			<a href="solTermino.asp?cveDivision=DC000&amp;cveZona=DC260&amp;cveArea=00000&amp;cveSector=0000000&amp;fechaDesde=2026/01/01&amp;fechaHasta=2026/05/26&amp;cveProceso=D&amp;cveProcImproc=T">DC260 DURANGO</a>
+			<a href="solTermino.asp?cveDivision=DC000&amp;cveZona=DC260&amp;cveArea=00000&amp;cveSector=0000000&amp;fechaDesde=2026/01/01&amp;fechaHasta=2026/05/28&amp;cveProceso=D&amp;cveProcImproc=T">DC260 DURANGO</a>
 		
 
 		</td>
@@ -3003,12 +3003,12 @@
 		</td>
 		
 		<td align="right">
-		629
+		642
 
 		</td>
 		
 		<td align="right">
-		403
+		408
 
 		</td>
 		
@@ -3018,17 +3018,17 @@
 		</td>
 		
 		<td align="right">
-		519
+		526
 
 		</td>
 		
 		<td align="right">
-		165
+		166
 
 		</td>
 		
 		<td align="right">
-		171
+		173
 
 		</td>
 		
@@ -3040,7 +3040,7 @@
 
 		<td align="right" bgcolor="#E1F4D0" style="font-weight:bold">
 		
-			<a href="solTermino.asp?cveDivision=DC000&amp;cveZona=DC260&amp;cveArea=00000&amp;cveSector=0000000&amp;fechaDesde=2026/01/01&amp;fechaHasta=2026/05/26&amp;cveProceso=D&amp;cveProcImproc=T">1,982</a>
+			<a href="solTermino.asp?cveDivision=DC000&amp;cveZona=DC260&amp;cveArea=00000&amp;cveSector=0000000&amp;fechaDesde=2026/01/01&amp;fechaHasta=2026/05/28&amp;cveProceso=D&amp;cveProcImproc=T">2,010</a>
 		
 		</td>
 		<td style="padding:0"><table width="15%" height="17" cellspacing="0" id="TABLE_15">
@@ -3048,14 +3048,14 @@
 			<td class="graficaIESS"></td>
 		  </tr>
 		</tbody></table></td>
-		<td align="center">15.17</td>
+		<td align="center">15.16</td>
 	</tr>
 
 	<tr class="celdaIESS alternate" height="16">
 		<td align="center">4</td>
 		<td align="left">
 		
-			<a href="solTermino.asp?cveDivision=DC000&amp;cveZona=DC220&amp;cveArea=00000&amp;cveSector=0000000&amp;fechaDesde=2026/01/01&amp;fechaHasta=2026/05/26&amp;cveProceso=D&amp;cveProcImproc=T">DC220 TORREON</a>
+			<a href="solTermino.asp?cveDivision=DC000&amp;cveZona=DC220&amp;cveArea=00000&amp;cveSector=0000000&amp;fechaDesde=2026/01/01&amp;fechaHasta=2026/05/28&amp;cveProceso=D&amp;cveProcImproc=T">DC220 TORREON</a>
 		
 
 		</td>
@@ -3066,12 +3066,12 @@
 		</td>
 		
 		<td align="right">
-		338
+		344
 
 		</td>
 		
 		<td align="right">
-		354
+		357
 
 		</td>
 		
@@ -3081,17 +3081,17 @@
 		</td>
 		
 		<td align="right">
-		1,017
+		1,046
 
 		</td>
 		
 		<td align="right">
-		105
+		106
 
 		</td>
 		
 		<td align="right">
-		50
+		51
 
 		</td>
 		
@@ -3103,7 +3103,7 @@
 
 		<td align="right" bgcolor="#E1F4D0" style="font-weight:bold">
 		
-			<a href="solTermino.asp?cveDivision=DC000&amp;cveZona=DC220&amp;cveArea=00000&amp;cveSector=0000000&amp;fechaDesde=2026/01/01&amp;fechaHasta=2026/05/26&amp;cveProceso=D&amp;cveProcImproc=T">1,951</a>
+			<a href="solTermino.asp?cveDivision=DC000&amp;cveZona=DC220&amp;cveArea=00000&amp;cveSector=0000000&amp;fechaDesde=2026/01/01&amp;fechaHasta=2026/05/28&amp;cveProceso=D&amp;cveProcImproc=T">1,991</a>
 		
 		</td>
 		<td style="padding:0"><table width="15%" height="17" cellspacing="0" id="TABLE_16">
@@ -3111,14 +3111,14 @@
 			<td class="graficaIESS"></td>
 		  </tr>
 		</tbody></table></td>
-		<td align="center">14.94</td>
+		<td align="center">15.02</td>
 	</tr>
 
 	<tr class="celdaIESS" height="16">
 		<td align="center">5</td>
 		<td align="left">
 		
-			<a href="solTermino.asp?cveDivision=DC000&amp;cveZona=DC270&amp;cveArea=00000&amp;cveSector=0000000&amp;fechaDesde=2026/01/01&amp;fechaHasta=2026/05/26&amp;cveProceso=D&amp;cveProcImproc=T">DC270 GOMEZ PALACIO</a>
+			<a href="solTermino.asp?cveDivision=DC000&amp;cveZona=DC270&amp;cveArea=00000&amp;cveSector=0000000&amp;fechaDesde=2026/01/01&amp;fechaHasta=2026/05/28&amp;cveProceso=D&amp;cveProcImproc=T">DC270 GOMEZ PALACIO</a>
 		
 
 		</td>
@@ -3129,12 +3129,12 @@
 		</td>
 		
 		<td align="right">
-		328
+		336
 
 		</td>
 		
 		<td align="right">
-		680
+		689
 
 		</td>
 		
@@ -3144,12 +3144,12 @@
 		</td>
 		
 		<td align="right">
-		538
+		544
 
 		</td>
 		
 		<td align="right">
-		116
+		121
 
 		</td>
 		
@@ -3159,14 +3159,14 @@
 		</td>
 		
 		<td align="right">
-		171
+		173
 
 		</td>
 		
 
 		<td align="right" bgcolor="#E1F4D0" style="font-weight:bold">
 		
-			<a href="solTermino.asp?cveDivision=DC000&amp;cveZona=DC270&amp;cveArea=00000&amp;cveSector=0000000&amp;fechaDesde=2026/01/01&amp;fechaHasta=2026/05/26&amp;cveProceso=D&amp;cveProcImproc=T">1,941</a>
+			<a href="solTermino.asp?cveDivision=DC000&amp;cveZona=DC270&amp;cveArea=00000&amp;cveSector=0000000&amp;fechaDesde=2026/01/01&amp;fechaHasta=2026/05/28&amp;cveProceso=D&amp;cveProcImproc=T">1,971</a>
 		
 		</td>
 		<td style="padding:0"><table width="15%" height="17" cellspacing="0" id="TABLE_17">
@@ -3174,14 +3174,14 @@
 			<td class="graficaIESS"></td>
 		  </tr>
 		</tbody></table></td>
-		<td align="center">14.86</td>
+		<td align="center">14.87</td>
 	</tr>
 
 	<tr class="celdaIESS alternate" height="16">
 		<td align="center">6</td>
 		<td align="left">
 		
-			<a href="solTermino.asp?cveDivision=DC000&amp;cveZona=DC020&amp;cveArea=00000&amp;cveSector=0000000&amp;fechaDesde=2026/01/01&amp;fechaHasta=2026/05/26&amp;cveProceso=D&amp;cveProcImproc=T">DC020 CUAUHTEMOC</a>
+			<a href="solTermino.asp?cveDivision=DC000&amp;cveZona=DC020&amp;cveArea=00000&amp;cveSector=0000000&amp;fechaDesde=2026/01/01&amp;fechaHasta=2026/05/28&amp;cveProceso=D&amp;cveProcImproc=T">DC020 CUAUHTEMOC</a>
 		
 
 		</td>
@@ -3192,12 +3192,12 @@
 		</td>
 		
 		<td align="right">
-		132
+		133
 
 		</td>
 		
 		<td align="right">
-		124
+		125
 
 		</td>
 		
@@ -3207,7 +3207,7 @@
 		</td>
 		
 		<td align="right">
-		331
+		334
 
 		</td>
 		
@@ -3229,7 +3229,7 @@
 
 		<td align="right" bgcolor="#E1F4D0" style="font-weight:bold">
 		
-			<a href="solTermino.asp?cveDivision=DC000&amp;cveZona=DC020&amp;cveArea=00000&amp;cveSector=0000000&amp;fechaDesde=2026/01/01&amp;fechaHasta=2026/05/26&amp;cveProceso=D&amp;cveProcImproc=T">628</a>
+			<a href="solTermino.asp?cveDivision=DC000&amp;cveZona=DC020&amp;cveArea=00000&amp;cveSector=0000000&amp;fechaDesde=2026/01/01&amp;fechaHasta=2026/05/28&amp;cveProceso=D&amp;cveProcImproc=T">633</a>
 		
 		</td>
 		<td style="padding:0"><table width="5%" height="17" cellspacing="0" id="TABLE_18">
@@ -3237,14 +3237,14 @@
 			<td class="graficaIESS"></td>
 		  </tr>
 		</tbody></table></td>
-		<td align="center">4.81</td>
+		<td align="center">4.77</td>
 	</tr>
 
 	<tr class="celdaIESS" height="16">
 		<td align="center">7</td>
 		<td align="left">
 		
-			<a href="solTermino.asp?cveDivision=DC000&amp;cveZona=DC240&amp;cveArea=00000&amp;cveSector=0000000&amp;fechaDesde=2026/01/01&amp;fechaHasta=2026/05/26&amp;cveProceso=D&amp;cveProcImproc=T">DC240 PARRAL</a>
+			<a href="solTermino.asp?cveDivision=DC000&amp;cveZona=DC240&amp;cveArea=00000&amp;cveSector=0000000&amp;fechaDesde=2026/01/01&amp;fechaHasta=2026/05/28&amp;cveProceso=D&amp;cveProcImproc=T">DC240 PARRAL</a>
 		
 
 		</td>
@@ -3260,7 +3260,7 @@
 		</td>
 		
 		<td align="right">
-		263
+		265
 
 		</td>
 		
@@ -3275,7 +3275,7 @@
 		</td>
 		
 		<td align="right">
-		52
+		53
 
 		</td>
 		
@@ -3292,7 +3292,7 @@
 
 		<td align="right" bgcolor="#E1F4D0" style="font-weight:bold">
 		
-			<a href="solTermino.asp?cveDivision=DC000&amp;cveZona=DC240&amp;cveArea=00000&amp;cveSector=0000000&amp;fechaDesde=2026/01/01&amp;fechaHasta=2026/05/26&amp;cveProceso=D&amp;cveProcImproc=T">498</a>
+			<a href="solTermino.asp?cveDivision=DC000&amp;cveZona=DC240&amp;cveArea=00000&amp;cveSector=0000000&amp;fechaDesde=2026/01/01&amp;fechaHasta=2026/05/28&amp;cveProceso=D&amp;cveProcImproc=T">501</a>
 		
 		</td>
 		<td style="padding:0"><table width="4%" height="17" cellspacing="0" id="TABLE_19">
@@ -3300,14 +3300,14 @@
 			<td class="graficaIESS"></td>
 		  </tr>
 		</tbody></table></td>
-		<td align="center">3.81</td>
+		<td align="center">3.78</td>
 	</tr>
 
 	<tr class="celdaIESS alternate" height="16">
 		<td align="center">8</td>
 		<td align="left">
 		
-			<a href="solTermino.asp?cveDivision=DC000&amp;cveZona=DC060&amp;cveArea=00000&amp;cveSector=0000000&amp;fechaDesde=2026/01/01&amp;fechaHasta=2026/05/26&amp;cveProceso=D&amp;cveProcImproc=T">DC060 DELICIAS</a>
+			<a href="solTermino.asp?cveDivision=DC000&amp;cveZona=DC060&amp;cveArea=00000&amp;cveSector=0000000&amp;fechaDesde=2026/01/01&amp;fechaHasta=2026/05/28&amp;cveProceso=D&amp;cveProcImproc=T">DC060 DELICIAS</a>
 		
 
 		</td>
@@ -3323,7 +3323,7 @@
 		</td>
 		
 		<td align="right">
-		72
+		73
 
 		</td>
 		
@@ -3333,7 +3333,7 @@
 		</td>
 		
 		<td align="right">
-		149
+		152
 
 		</td>
 		
@@ -3343,7 +3343,7 @@
 		</td>
 		
 		<td align="right">
-		5
+		6
 
 		</td>
 		
@@ -3355,7 +3355,7 @@
 
 		<td align="right" bgcolor="#E1F4D0" style="font-weight:bold">
 		
-			<a href="solTermino.asp?cveDivision=DC000&amp;cveZona=DC060&amp;cveArea=00000&amp;cveSector=0000000&amp;fechaDesde=2026/01/01&amp;fechaHasta=2026/05/26&amp;cveProceso=D&amp;cveProcImproc=T">310</a>
+			<a href="solTermino.asp?cveDivision=DC000&amp;cveZona=DC060&amp;cveArea=00000&amp;cveSector=0000000&amp;fechaDesde=2026/01/01&amp;fechaHasta=2026/05/28&amp;cveProceso=D&amp;cveProcImproc=T">315</a>
 		
 		</td>
 		<td style="padding:0"><table width="2%" height="17" cellspacing="0" id="TABLE_20">
@@ -3363,14 +3363,14 @@
 			<td class="graficaIESS"></td>
 		  </tr>
 		</tbody></table></td>
-		<td align="center">2.37</td>
+		<td align="center">2.38</td>
 	</tr>
 
 	<tr class="celdaIESS" height="16">
 		<td align="center">9</td>
 		<td align="left">
 		
-			<a href="solTermino.asp?cveDivision=DC000&amp;cveZona=DC140&amp;cveArea=00000&amp;cveSector=0000000&amp;fechaDesde=2026/01/01&amp;fechaHasta=2026/05/26&amp;cveProceso=D&amp;cveProcImproc=T">DC140 CASAS GRANDES</a>
+			<a href="solTermino.asp?cveDivision=DC000&amp;cveZona=DC140&amp;cveArea=00000&amp;cveSector=0000000&amp;fechaDesde=2026/01/01&amp;fechaHasta=2026/05/28&amp;cveProceso=D&amp;cveProcImproc=T">DC140 CASAS GRANDES</a>
 		
 
 		</td>
@@ -3396,7 +3396,7 @@
 		</td>
 		
 		<td align="right">
-		44
+		45
 
 		</td>
 		
@@ -3418,7 +3418,7 @@
 
 		<td align="right" bgcolor="#E1F4D0" style="font-weight:bold">
 		
-			<a href="solTermino.asp?cveDivision=DC000&amp;cveZona=DC140&amp;cveArea=00000&amp;cveSector=0000000&amp;fechaDesde=2026/01/01&amp;fechaHasta=2026/05/26&amp;cveProceso=D&amp;cveProcImproc=T">165</a>
+			<a href="solTermino.asp?cveDivision=DC000&amp;cveZona=DC140&amp;cveArea=00000&amp;cveSector=0000000&amp;fechaDesde=2026/01/01&amp;fechaHasta=2026/05/28&amp;cveProceso=D&amp;cveProcImproc=T">166</a>
 		
 		</td>
 		<td style="padding:0"><table width="1%" height="17" cellspacing="0" id="TABLE_21">
@@ -3426,7 +3426,7 @@
 			<td class="graficaIESS"></td>
 		  </tr>
 		</tbody></table></td>
-		<td align="center">1.26</td>
+		<td align="center">1.25</td>
 	</tr>
 
 	</tbody>
@@ -3435,23 +3435,23 @@
 			<td>&nbsp;</td>
 			<td>TOTAL</td>
 			
-		<td align="right">478</td>
+		<td align="right">479</td>
 		
-		<td align="right">2,271</td>
+		<td align="right">2,305</td>
 		
-		<td align="right">3,128</td>
+		<td align="right">3,170</td>
 		
-		<td align="right">280</td>
+		<td align="right">285</td>
 		
-		<td align="right">4,236</td>
+		<td align="right">4,306</td>
 		
-		<td align="right">1,119</td>
+		<td align="right">1,143</td>
 		
-		<td align="right">1,206</td>
+		<td align="right">1,221</td>
 		
-		<td align="right">345</td>
+		<td align="right">348</td>
 		
-		<td align="right" style="font-weight:bold">13,063</td>
+		<td align="right" style="font-weight:bold">13,257</td>
 		<td align="right">&nbsp;</td>
 		<td align="right">&nbsp;</td>
 		</tr>

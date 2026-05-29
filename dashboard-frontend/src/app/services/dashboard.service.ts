@@ -28,4 +28,13 @@ export class DashboardService {
       compare: { [code: string]: any[] };
     }>(`${this.API}/fullcompare`);
   }
+
+  getCausas(code: string = 'E02') {
+    return this.http.get<any[]>(`${this.API}/causas?code=${encodeURIComponent(code)}`);
+  }
+
+  getCausasAll(year?: number) {
+    const q = year ? `?year=${year}` : '';
+    return this.http.get<{ [code: string]: any[] }>(`${this.API}/causas/all${q}`);
+  }
 }

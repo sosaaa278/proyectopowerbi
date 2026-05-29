@@ -4,72 +4,81 @@ using DashboardAPI.Models;
 
 namespace DashboardAPI.Services
 {
+    /// <summary>
+    /// Singleton service that caches a full two-year scrape.
+    /// Cache TTL: 4 hours. Invalidate manually via InvalidateCache().
+    /// Thread-safe via SemaphoreSlim (double-checked locking pattern).
+    /// </summary>
     public class FullCompareService
     {
+        // ── Cache ──────────────────────────────────────────────────────────────────
+        private static readonly TimeSpan CacheTtl = TimeSpan.FromHours(4);
         private FullCompareResponse? _cache;
-        private readonly SemaphoreSlim _lock = new SemaphoreSlim(1, 1);
+        private DateTime             _cacheTime = DateTime.MinValue;
+        private readonly SemaphoreSlim _lock = new(1, 1);
+
+        // ── Browser config (mirrors WebScraperService) ─────────────────────────────
+        private const string UserAgent =
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
+            "(KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36";
+
+        private readonly ILogger<FullCompareService> _logger;
+
+        public FullCompareService(ILogger<FullCompareService> logger)
+        {
+            _logger = logger;
+        }
+
+        // ── Public API ─────────────────────────────────────────────────────────────
 
         public async Task<FullCompareResponse> GetFullCompareAsync()
         {
-            if (_cache != null) return _cache;
+            // Fast path: valid cache (no lock needed)
+            if (_cache != null && DateTime.UtcNow - _cacheTime < CacheTtl)
+                return _cache;
 
             await _lock.WaitAsync();
             try
             {
-                if (_cache != null) return _cache;
+                // Double-checked locking: another thread may have populated cache
+                if (_cache != null && DateTime.UtcNow - _cacheTime < CacheTtl)
+                    return _cache;
 
-                var today = DateTime.Now;
+                _logger.LogInformation("Cache miss — starting full scrape (TTL expired or first run)");
 
+                var today        = DateTime.Now;
                 var previousYear = today.Year - 1;
-                var currentYear = today.Year;
-                var url = "https://cssnal.cfe.mx/Inconformidades/solTermino.asp";
+                var currentYear  = today.Year;
+                const string url = "https://cssnal.cfe.mx/Inconformidades/solTermino.asp";
 
-                using var playwright = await Playwright.CreateAsync();
-
-                var userDataDir = Path.Combine(
-                    Directory.GetCurrentDirectory(),
-                    "playwright-data");
-
-                var isWindows = OperatingSystem.IsWindows();
-
-                var context = await playwright.Chromium
-                    .LaunchPersistentContextAsync(
-                        userDataDir,
-                        new BrowserTypeLaunchPersistentContextOptions
-                        {
-                            Headless = true,
-                            Channel = isWindows ? "msedge" : null,
-                            UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-                            SlowMo = 500,
-                            Args = ["--no-sandbox", "--disable-setuid-sandbox"]
-                        });
-
+                var (pw, ctx) = await CreateBrowserAsync();
                 try
                 {
-                    var data2025 = await ScrapeYearAsync(
-                        context,
-                        url,
+                    var data2025 = await ScrapeYearAsync(ctx, url,
                         $"{previousYear}/01/01",
                         $"{previousYear}/{today.Month:D2}/{today.Day:D2}");
 
-                    await Task.Delay(3000);
+                    _logger.LogInformation("Scraped {Count} rows for {Year}", data2025.Count, previousYear);
+                    await Task.Delay(2000);
 
-                    var data2026 = await ScrapeYearAsync(
-                        context,
-                        url,
+                    var data2026 = await ScrapeYearAsync(ctx, url,
                         $"{currentYear}/01/01",
                         $"{currentYear}/{today.Month:D2}/{today.Day:D2}");
 
-                    _cache = new FullCompareResponse
+                    _logger.LogInformation("Scraped {Count} rows for {Year}", data2026.Count, currentYear);
+
+                    _cache     = new FullCompareResponse
                     {
                         RawData2026 = data2026,
-                        Compare = BuildResult(data2025, data2026)
+                        Compare     = BuildCompare(data2025, data2026)
                     };
+                    _cacheTime = DateTime.UtcNow;
                     return _cache;
                 }
                 finally
                 {
-                    await context.CloseAsync();
+                    await ctx.CloseAsync();
+                    pw.Dispose();
                 }
             }
             finally
@@ -78,71 +87,96 @@ namespace DashboardAPI.Services
             }
         }
 
-        public void InvalidateCache() => _cache = null;
+        /// <summary>Forces the next call to re-scrape regardless of TTL.</summary>
+        public void InvalidateCache()
+        {
+            _cache     = null;
+            _cacheTime = DateTime.MinValue;
+            _logger.LogInformation("FullCompareService cache invalidated");
+        }
 
-        private static string CleanCell(HtmlNode cell) =>
-            System.Net.WebUtility.HtmlDecode(cell.InnerText)
-                .Replace(" ", "")
-                .Trim();
+        // ── Browser ────────────────────────────────────────────────────────────────
+
+        private static async Task<(IPlaywright pw, IBrowserContext ctx)> CreateBrowserAsync()
+        {
+            var pw      = await Playwright.CreateAsync();
+            var dataDir = Path.Combine(Directory.GetCurrentDirectory(), "playwright-data");
+
+            var ctx = await pw.Chromium.LaunchPersistentContextAsync(dataDir,
+                new BrowserTypeLaunchPersistentContextOptions
+                {
+                    Headless  = true,
+                    Channel   = OperatingSystem.IsWindows() ? "msedge" : null,
+                    UserAgent = UserAgent,
+                    SlowMo    = 300,
+                    Args      = ["--no-sandbox", "--disable-setuid-sandbox"]
+                });
+
+            return (pw, ctx);
+        }
+
+        // ── Scraping ───────────────────────────────────────────────────────────────
 
         private async Task<List<Dictionary<string, string>>> ScrapeYearAsync(
-            IBrowserContext context,
-            string url,
-            string fechaDesde,
-            string fechaHasta)
+            IBrowserContext ctx, string url, string fechaDesde, string fechaHasta)
         {
             var result = new List<Dictionary<string, string>>();
+            var page   = ctx.Pages.Count > 0 ? ctx.Pages[0] : await ctx.NewPageAsync();
 
-            var page = context.Pages.FirstOrDefault()
-                ?? await context.NewPageAsync();
-
+            // Navigate with up to 3 retries
             bool loaded = false;
-            int retries = 0;
-
-            while (!loaded && retries < 3)
+            for (int attempt = 0; attempt < 3 && !loaded; attempt++)
             {
                 try
                 {
                     await page.GotoAsync(url, new PageGotoOptions
                     {
                         WaitUntil = WaitUntilState.DOMContentLoaded,
-                        Timeout = 300000
+                        Timeout   = 60_000
                     });
                     loaded = true;
                 }
-                catch
+                catch (Exception ex)
                 {
-                    retries++;
-                    await Task.Delay(3000);
+                    _logger.LogWarning("Navigate attempt {A}/3 failed: {Err}", attempt + 1, ex.Message);
+                    if (attempt < 2) await Task.Delay(2000 * (int)Math.Pow(2, attempt));
                 }
             }
 
-            await page.WaitForTimeoutAsync(3000);
+            if (!loaded)
+            {
+                _logger.LogError("Could not navigate to {Url}", url);
+                return result;
+            }
 
-            await page.WaitForSelectorAsync(
-                "select[name='cveDivision']",
-                new() { Timeout = 300000 });
+            await page.WaitForSelectorAsync("select[name='cveDivision']", new() { Timeout = 60_000 });
 
-            await page.SelectOptionAsync("select[name='cveDivision']", "DC000");
-            await page.WaitForTimeoutAsync(1000);
-            await page.SelectOptionAsync("select[name='cveZona']", "00000");
-            await page.WaitForTimeoutAsync(1000);
-            await page.SelectOptionAsync("select[name='cveArea']", "00000");
-            await page.WaitForTimeoutAsync(1000);
-            await page.SelectOptionAsync("select[name='cveProceso']", "D");
-            await page.WaitForTimeoutAsync(1000);
-            await page.SelectOptionAsync("select[name='cveProcImproc']", "T");
-            await page.WaitForTimeoutAsync(1000);
-
+            // Fill form
+            await page.SelectOptionAsync("select[name='cveDivision']", "DC000"); await page.WaitForTimeoutAsync(1000);
+            await page.SelectOptionAsync("select[name='cveZona']",     "00000"); await page.WaitForTimeoutAsync(800);
+            await page.SelectOptionAsync("select[name='cveArea']",     "00000"); await page.WaitForTimeoutAsync(800);
+            await page.SelectOptionAsync("select[name='cveProceso']",  "D");     await page.WaitForTimeoutAsync(800);
+            await page.SelectOptionAsync("select[name='cveProcImproc']","T");    await page.WaitForTimeoutAsync(800);
             await page.FillAsync("input[name='fechaDesde']", fechaDesde);
             await page.FillAsync("input[name='fechaHasta']", fechaHasta);
-            await page.WaitForTimeoutAsync(1000);
+            await page.WaitForTimeoutAsync(500);
 
             await page.ClickAsync("#procesa");
-            await page.WaitForTimeoutAsync(10000);
 
+            // Wait for results table instead of a fixed delay
+            try
+            {
+                await page.WaitForSelectorAsync("#TABLE_12", new() { Timeout = 30_000 });
+            }
+            catch
+            {
+                _logger.LogWarning("TABLE_12 not found for {Desde}→{Hasta}", fechaDesde, fechaHasta);
+            }
+            await page.WaitForTimeoutAsync(1500);
+
+            // Parse
             var html = await page.ContentAsync();
-            var doc = new HtmlDocument();
+            var doc  = new HtmlDocument();
             doc.LoadHtml(html);
 
             var table = doc.DocumentNode.SelectSingleNode("//table[@id='TABLE_12']");
@@ -152,30 +186,29 @@ namespace DashboardAPI.Services
             if (headerCells == null) return result;
 
             var headers = new List<string> { "SEC", "AREA" };
-            foreach (var header in headerCells)
+            foreach (var h in headerCells)
             {
-                var text = CleanCell(header);
-                if (!string.IsNullOrWhiteSpace(text))
-                    headers.Add(text);
+                var t = NormalizeCell(h);
+                if (!string.IsNullOrWhiteSpace(t)) headers.Add(t);
             }
 
             var rows = table.SelectNodes(".//tr");
             if (rows == null) return result;
 
-            foreach (var row in rows.Skip(2))
+            // Use indexed access (avoids Enumerable overhead on HtmlNodeCollection)
+            for (int ri = 2; ri < rows.Count; ri++)
             {
-                var cells = row.SelectNodes("./td");
+                var cells = rows[ri].SelectNodes("./td");
                 if (cells == null || cells.Count < 3) continue;
 
-                var item = new Dictionary<string, string>();
-                item["SEC"] = CleanCell(cells[0]);
-                item["AREA"] = CleanCell(cells[1]);
-
-                for (int i = 2; i < cells.Count; i++)
+                var item = new Dictionary<string, string>
                 {
-                    if (i >= headers.Count) break;
-                    item[headers[i]] = CleanCell(cells[i]);
-                }
+                    ["SEC"]  = NormalizeCell(cells[0]),
+                    ["AREA"] = NormalizeCell(cells[1])
+                };
+
+                for (int i = 2; i < cells.Count && i < headers.Count; i++)
+                    item[headers[i]] = NormalizeCell(cells[i]);
 
                 result.Add(item);
             }
@@ -183,13 +216,24 @@ namespace DashboardAPI.Services
             return result;
         }
 
-        private static Dictionary<string, List<Comparativo>> BuildResult(
+        // ── Data Processing ────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Builds the compare dictionary keyed by inconformidad code.
+        /// O(n) per code thanks to the area lookup dictionary — was O(n²) before.
+        /// </summary>
+        private static Dictionary<string, List<Comparativo>> BuildCompare(
             List<Dictionary<string, string>> data2025,
             List<Dictionary<string, string>> data2026)
         {
             var result = new Dictionary<string, List<Comparativo>>();
-
             if (data2026.Count == 0) return result;
+
+            // O(n) lookup: normalize area key to prevent whitespace/case mismatches
+            var lookup2025 = data2025
+                .Where(r => r.ContainsKey("AREA"))
+                .GroupBy(r => NormalizeArea(r["AREA"]))
+                .ToDictionary(g => g.Key, g => g.First());
 
             var codes = data2026[0].Keys
                 .Where(k => k != "SEC" && k != "AREA")
@@ -197,29 +241,25 @@ namespace DashboardAPI.Services
 
             foreach (var code in codes)
             {
-                var comparativos = new List<Comparativo>();
+                var comparativos = new List<Comparativo>(data2026.Count);
 
                 foreach (var row2026 in data2026)
                 {
-                    var area = row2026["AREA"];
-                    var row2025 = data2025.FirstOrDefault(x => x["AREA"] == area);
+                    if (!row2026.TryGetValue("AREA", out var rawArea)) continue;
 
-                    double val2025 = 0;
-                    double val2026 = 0;
+                    var area       = NormalizeArea(rawArea);
+                    var val2026    = ParseDouble(row2026, code);
+                    var val2025    = lookup2025.TryGetValue(area, out var row2025)
+                                     ? ParseDouble(row2025, code)
+                                     : 0;
 
-                    if (row2025 != null && row2025.ContainsKey(code))
-                        double.TryParse(row2025[code].Replace(",", ""), out val2025);
-
-                    if (row2026.ContainsKey(code))
-                        double.TryParse(row2026[code].Replace(",", ""), out val2026);
-
-                    double variacion = 0;
-                    if (val2025 > 0 || val2026 > 0)
-                        variacion = ((val2026 - val2025) / Math.Max(val2025, 1)) * 100;
+                    var variacion  = val2025 > 0
+                        ? ((val2026 - val2025) / val2025) * 100
+                        : val2026 > 0 ? 100 : 0;
 
                     comparativos.Add(new Comparativo
                     {
-                        AREA = area,
+                        AREA      = rawArea.Trim(), // keep original casing for display
                         Total2025 = val2025,
                         Total2026 = val2026,
                         Variacion = Math.Round(variacion, 2)
@@ -230,6 +270,26 @@ namespace DashboardAPI.Services
             }
 
             return result;
+        }
+
+        // ── Helpers ────────────────────────────────────────────────────────────────
+
+        /// <summary>Decodes HTML and strips non-breaking spaces.</summary>
+        private static string NormalizeCell(HtmlNode node) =>
+            System.Net.WebUtility.HtmlDecode(node.InnerText)
+                .Replace(" ", " ")
+                .Trim();
+
+        /// <summary>Normalizes an area name for comparison (trim + upper).</summary>
+        private static string NormalizeArea(string area) =>
+            area.Trim().ToUpperInvariant();
+
+        /// <summary>Safely parses a numeric string from a row dictionary.</summary>
+        private static double ParseDouble(Dictionary<string, string> row, string key)
+        {
+            if (!row.TryGetValue(key, out var raw)) return 0;
+            double.TryParse(raw.Replace(",", ""), out double val);
+            return val;
         }
     }
 }

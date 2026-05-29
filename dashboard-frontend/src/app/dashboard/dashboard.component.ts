@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import Chart from 'chart.js/auto';
 import * as XLSX from 'xlsx-js-style';
 import { DashboardService } from '../services/dashboard.service';
@@ -79,8 +80,56 @@ const BAR_DATALABELS_PLUGIN: any = {
   }
 };
 
-// Paleta segura para pastel: sin verdes (90–160°) ni rojos (0–20°, 340–360°)
-const PIE_SAFE_HUES = [210, 270, 45, 190, 305, 235, 25, 180, 260, 55, 320, 200];
+const PIE_COLORS = [
+  'rgb(230, 57, 70)',
+  'rgb(0, 119, 255)',
+  'rgb(50, 205, 50)',
+  'rgb(255, 200, 0)',
+  'rgb(128, 0, 128)',
+  'rgb(255, 102, 0)',
+  'rgb(0, 206, 209)',
+  'rgb(255, 20, 147)',
+  'rgb(101, 67, 33)',
+  'rgb(64, 64, 64)',
+];
+
+// ── Plugin: etiquetas de área y cantidad sobre cada rebanada de pastel ─────────
+const PIE_DATALABELS_PLUGIN: any = {
+  id: 'pieDatalabels',
+  afterDatasetsDraw(chart: any) {
+    if (chart.config.type !== 'pie') return;
+    const { ctx } = chart;
+    const ds     = chart.data.datasets[0];
+    const meta   = chart.getDatasetMeta(0);
+    const labels = chart.data.labels as string[];
+    const total  = (ds.data as number[]).reduce((a: number, b: number) => a + b, 0);
+
+    meta.data.forEach((arc: any, i: number) => {
+      const val = ds.data[i] as number;
+      if (!val || total === 0 || val / total < 0.035) return;
+
+      const midAngle = arc.startAngle + (arc.endAngle - arc.startAngle) / 2;
+      const r = arc.outerRadius * 0.62;
+      const x = arc.x + Math.cos(midAngle) * r;
+      const y = arc.y + Math.sin(midAngle) * r;
+
+      const raw   = String(labels[i] ?? '');
+      const short = raw.length > 13 ? raw.slice(0, 12) + '…' : raw;
+      const valStr = val.toLocaleString('es-MX');
+
+      ctx.save();
+      ctx.textAlign    = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.shadowColor  = 'rgba(0,0,0,0.55)';
+      ctx.shadowBlur   = 3;
+      ctx.fillStyle    = '#ffffff';
+      ctx.font         = 'bold 9px "Segoe UI", sans-serif';
+      ctx.fillText(short,  x, y - 7);
+      ctx.fillText(valStr, x, y + 7);
+      ctx.restore();
+    });
+  }
+};
 
 @Component({
   selector: 'app-dashboard',
@@ -118,7 +167,8 @@ export class DashboardComponent implements OnInit {
 
   constructor(
     private dashboardService: DashboardService,
-    public auth: AuthService
+    public auth: AuthService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -127,6 +177,89 @@ export class DashboardComponent implements OnInit {
 
   isTotal(area: any): boolean {
     return /^total$/i.test(String(area ?? '').trim());
+  }
+
+  readonly COMPARE_CODES = ['30202', 'E02', 'E03', 'E04', 'E05', 'E06', 'E07', 'Q07'];
+  readonly VISIBLE_COMPARE_CODES = ['30202', 'E02', 'E03', 'E04', 'E05', 'E06', 'E07', 'Q07'];
+
+  get hasCompareData(): boolean {
+    return Object.keys(this.allCompareData).length > 0;
+  }
+
+  get visibleColumns(): string[] {
+    const without = this.columns.filter(c => c !== '30202' && !/^total$/i.test(c.trim()));
+    const idxE02 = without.indexOf('E02');
+    if (idxE02 !== -1 && this.columns.includes('30202')) {
+      without.splice(idxE02, 0, '30202');
+    }
+    return without;
+  }
+
+  get rawDataColumns(): string[] {
+    const cols = this.columns.filter(c => c !== '30202');
+    const idxE02 = cols.indexOf('E02');
+    if (idxE02 !== -1 && this.columns.includes('30202')) {
+      cols.splice(idxE02, 0, '30202');
+    }
+    return cols;
+  }
+
+  isCompareCode(col: string): boolean {
+    return this.VISIBLE_COMPARE_CODES.includes(col);
+  }
+
+  get2025Value(area: string, code: string): number {
+    const rows = this.allCompareData[code];
+    if (!rows) return 0;
+    const clean = String(area ?? '').trim();
+    const found = rows.find((r: any) => String(r.area ?? '').trim() === clean);
+    return this.parseValue(found?.total2025 ?? 0);
+  }
+
+  get2026CellStyle(row: any, col: string): { [key: string]: string } {
+    if (!this.isCompareCode(col)) return {};
+    const v25 = this.get2025Value(row['AREA'], col);
+    const v26 = this.parseValue(row[col] ?? 0);
+    if (v26 > v25) return { 'background-color': 'rgba(220,53,69,0.28)' };
+    if (v26 < v25) return { 'background-color': 'rgba(40,167,69,0.28)' };
+    return {};
+  }
+
+  get2025SubRowCellStyle(isFirst: boolean): { [key: string]: string } {
+    return {
+      'background-color': 'rgba(215,228,255,0.55)',
+      'border-top': '1px dashed #9ca3af',
+      ...(isFirst ? { 'border-left': '3px solid #6c757d' } : {})
+    };
+  }
+
+  getZoneTotal2026(row: any): number {
+    return this.VISIBLE_COMPARE_CODES.reduce((sum, code) => sum + this.parseValue(row[code] ?? 0), 0);
+  }
+
+  getZoneTotal2025(area: string): number {
+    return this.VISIBLE_COMPARE_CODES.reduce((sum, code) => sum + this.get2025Value(area, code), 0);
+  }
+
+  getTotalZoneCellStyle2026(row: any): { [key: string]: string } {
+    const v26 = this.getZoneTotal2026(row);
+    const v25 = this.getZoneTotal2025(row['AREA']);
+    const base: { [key: string]: string } = {
+      'font-weight': 'bold',
+      'border': '2px solid #343a40'
+    };
+    if (v26 > v25) return { ...base, 'background-color': 'rgba(220,53,69,0.38)' };
+    if (v26 < v25) return { ...base, 'background-color': 'rgba(40,167,69,0.38)' };
+    return { ...base, 'background-color': 'rgba(108,117,125,0.18)' };
+  }
+
+  get2025CellStyle(row: any, col: string): { [key: string]: string } {
+    if (!this.isCompareCode(col)) return {};
+    const v25 = this.get2025Value(row['AREA'], col);
+    const v26 = this.parseValue(row[col] ?? 0);
+    if (v26 > v25) return { 'background-color': 'rgba(220,53,69,0.18)' };
+    if (v26 < v25) return { 'background-color': 'rgba(40,167,69,0.18)' };
+    return {};
   }
 
   // =========================
@@ -212,9 +345,7 @@ export class DashboardComponent implements OnInit {
 
     // ── PASTEL ───────────────────────────────────────────────────────────────
     if (this.chartType === 'pie') {
-      const colors = labels.map((_, i) =>
-        `hsl(${PIE_SAFE_HUES[i % PIE_SAFE_HUES.length]}, 65%, 55%)`
-      );
+      const colors = labels.map((_, i) => PIE_COLORS[i % PIE_COLORS.length]);
       const pieValues = this.pieYear === '2025' ? values2025 : values2026;
       const totalPie  = pieValues.reduce((a, b) => a + b, 0);
       return {
@@ -249,7 +380,8 @@ export class DashboardComponent implements OnInit {
               }
             }
           }
-        }
+        },
+        plugins: [PIE_DATALABELS_PLUGIN]
       };
     }
 
@@ -438,6 +570,32 @@ export class DashboardComponent implements OnInit {
   // =========================
   // EXPORTAR
   // =========================
+
+  verCausas(): void {
+    this.router.navigate(['/causas']);
+  }
+
+  exportSubRowExcel(): void {
+    const data: any[] = [];
+    this.tableData.forEach(row => {
+      const entry2026: any = { AÑO: '2026' };
+      this.visibleColumns.forEach(col => entry2026[col] = row[col]);
+      data.push(entry2026);
+      if (!this.isTotal(row['AREA'])) {
+        const entry2025: any = { AÑO: '2025' };
+        this.visibleColumns.forEach(col => {
+          if (col === 'AREA') entry2025[col] = row[col];
+          else if (this.isCompareCode(col)) entry2025[col] = this.get2025Value(row['AREA'], col);
+          else entry2025[col] = '';
+        });
+        data.push(entry2025);
+      }
+    });
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Comparativo_Inconformidades');
+    XLSX.writeFile(wb, 'comparativo_inconformidades.xlsx');
+  }
 
   exportExcel(): void {
     const ws = XLSX.utils.json_to_sheet(this.tableData);

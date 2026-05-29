@@ -215,20 +215,79 @@
   <div *ngIf="tableData.length > 0" class="card shadow-sm p-4 mb-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
       <h3 class="mb-0">Datos obtenidos (2026)</h3>
-      <button class="btn btn-success btn-sm" (click)="exportExcel()">Exportar Excel</button>
+      <div class="d-flex gap-2">
+        <button class="btn btn-success btn-sm" (click)="exportExcel()">Exportar Excel</button>
+        <button class="btn btn-success btn-sm" (click)="verCausas()">Ver causas</button>
+      </div>
     </div>
     <div class="table-responsive">
       <table class="table table-bordered table-striped table-sm">
         <thead class="table-dark">
           <tr>
-            <th *ngFor="let column of columns">{{ column }}</th>
+            <th *ngFor="let column of rawDataColumns">{{ column }}</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let row of tableData"
             [ngClass]="{ 'fw-bold table-secondary': isTotal(row['AREA']) }">
-            <td *ngFor="let column of columns">{{ row[column] }}</td>
+            <td *ngFor="let column of rawDataColumns">{{ row[column] }}</td>
           </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Tabla datos 2026 + sub-filas comparativas 2025 por inconformidad -->
+  <div *ngIf="tableData.length > 0 && hasCompareData" class="card shadow-sm p-4 mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h3 class="mb-0">Datos 2026 con comparativo 2025 por inconformidad</h3>
+      <div class="d-flex gap-2">
+        <button class="btn btn-success btn-sm" (click)="exportSubRowExcel()">Exportar Excel</button>
+        <button class="btn btn-success btn-sm" (click)="verCausas()">Ver causas</button>
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-bordered table-sm">
+        <thead class="table-dark">
+          <tr>
+            <th *ngFor="let col of visibleColumns">{{ col }}</th>
+            <th style="border: 2px solid #fff; background-color: #1e3a5f; text-align:center;">TOTAL</th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container *ngFor="let row of tableData">
+
+            <!-- Fila principal 2026 (coloreada rojo/verde) -->
+            <tr [ngClass]="{ 'fw-bold table-secondary': isTotal(row['AREA']) }">
+              <td *ngFor="let col of visibleColumns"
+                  [ngStyle]="!isTotal(row['AREA']) ? get2026CellStyle(row, col) : {}">
+                {{ row[col] }}
+              </td>
+              <td [ngStyle]="!isTotal(row['AREA']) ? getTotalZoneCellStyle2026(row) : { 'font-weight': 'bold', 'border': '2px solid #343a40' }"
+                  style="text-align:center;">
+                {{ getZoneTotal2026(row) | number }}
+              </td>
+            </tr>
+
+            <!-- Sub-fila 2025 (remarcada como año comparativo) -->
+            <tr *ngIf="!isTotal(row['AREA'])"
+                style="font-size:0.8rem; font-style:italic;">
+              <td *ngFor="let col of visibleColumns; let isFirst = first"
+                  [ngStyle]="get2025SubRowCellStyle(isFirst)">
+                <ng-container *ngIf="col === 'AREA'">
+                  <em style="color:#444; font-weight:600;">↳ 2025</em>
+                </ng-container>
+                <ng-container *ngIf="col !== 'AREA' && isCompareCode(col)">
+                  {{ get2025Value(row['AREA'], col) | number }}
+                </ng-container>
+              </td>
+              <td [ngStyle]="get2025SubRowCellStyle(false)"
+                  style="font-weight:600; border: 2px solid #6c757d !important; text-align:center;">
+                {{ getZoneTotal2025(row['AREA']) | number }}
+              </td>
+            </tr>
+
+          </ng-container>
         </tbody>
       </table>
     </div>
@@ -241,7 +300,10 @@
         Comparativo 2025 vs 2026
         <span *ngIf="selectedCode" class="badge-code ms-2">{{ selectedCode }}</span>
       </h3>
-      <button class="btn btn-success btn-sm" (click)="exportCompareExcel()">Exportar Excel</button>
+      <div class="d-flex gap-2">
+        <button class="btn btn-success btn-sm" (click)="exportCompareExcel()">Exportar Excel</button>
+        <button class="btn btn-success btn-sm" (click)="verCausas()">Ver causas</button>
+      </div>
     </div>
     <div class="table-responsive">
       <table class="table table-bordered table-sm">
